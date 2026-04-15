@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home | {{ site_settings.restaurant_name }}{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+    {% if site_settings.hero_image %}
+        <div class="hero-bg">
+            <img src="{{ site_settings.hero_image.url }}" alt="{{ site_settings.restaurant_name }}">
+        </div>
+    {% endif %}
+
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-content">
+        <p class="section-eyebrow">WELCOME TO {{ site_settings.restaurant_name|upper }}</p>
+        <h1>Authentic Arab Cuisine in a Refined Atmosphere</h1>
+        <p class="hero-text">
+            {{ site_settings.short_description }}
+        </p>
+
+        <div class="hero-buttons">
+            <a href="/menu/" class="btn btn-gold">View Menu</a>
+            <a href="/reservations/" class="btn btn-outline">Book a Table</a>
+        </div>
+    </div>
+</section>
+
+<!-- MENU + RESERVATIONS SECTION -->
+<section class="home-feature-section">
+    <div class="container">
+        <div class="feature-intro">
+            <p class="section-eyebrow">OUR EXPERIENCE</p>
+            <h2>Elegance, Flavor, and Atmosphere</h2>
+            <p>
+                At {{ site_settings.restaurant_name }}, every detail is designed to create a memorable dining experience,
+                where authentic flavors meet refined ambiance.
+            </p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🍽</div>
+                <h3>Our Menu</h3>
+                <p>
+                    Explore a curated menu inspired by authentic Arab cuisine, crafted with rich flavors,
+                    premium ingredients, and elegant presentation.
+                </p>
+                <a href="/menu/" class="btn btn-gold">View Menu</a>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Reservations</h3>
+                <p>
+                    Reserve your table and enjoy an unforgettable evening shaped by atmosphere, taste,
+                    and warm hospitality.
+                </p>
+                <a href="/reservations/" class="btn btn-gold">Book a Table</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- OUR STORY SECTION -->
+<section class="story-section">
+    <div class="container story-container">
+        <div class="story-image">
+            {% if site_settings.hero_image %}
+                <img src="{{ site_settings.hero_image.url }}" alt="Our Story">
+            {% else %}
+                <img src="{% static 'images/story.png' %}" alt="Our Story">
+            {% endif %}
+        </div>
+
+        <div class="story-content">
+            <p class="section-eyebrow">OUR STORY</p>
+            <h2>The Story Behind {{ site_settings.restaurant_name }}</h2>
+            <p>
+                {{ site_settings.restaurant_name }} was created as a place where authentic Arab flavors meet elegance,
+                warmth, and unforgettable moments. More than a restaurant, it is a carefully crafted dining experience
+                designed for people who appreciate atmosphere, detail, and refined taste.
+            </p>
+            <a href="/about/" class="btn btn-gold">Discover More</a>
+        </div>
+    </div>
+</section>
+
+<!-- REVIEWS PREVIEW -->
+<section class="reviews-section">
+    <div class="container">
+        <div class="feature-intro">
+            <p class="section-eyebrow">GUEST REVIEWS</p>
+            <h2>What Our Guests Say</h2>
+        </div>
+
+        <div class="reviews-grid">
+            {% for review in approved_reviews %}
+                <div class="review-card">
+                    <div class="review-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span>★</span>
+                            {% else %}
+                                <span class="star-muted">★</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="review-text">“{{ review.review_text }}”</p>
+                    <h4>{{ review.name }}</h4>
+                </div>
+            {% empty %}
+                <div class="review-card">
+                    <div class="review-stars">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="review-text">
+                        “An elegant atmosphere, unforgettable flavors, and a dining experience that truly feels special.”
+                    </p>
+                    <h4>Guest Review</h4>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="reviews-button-wrap">
+            <a href="/reviews/" class="btn btn-outline">Read More Reviews</a>
+        </div>
+    </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+    <div class="container cta-content">
+        <p class="section-eyebrow">RESERVE YOUR EXPERIENCE</p>
+        <h2>Make Your Evening Memorable</h2>
+        <p>
+            Book your table today and discover the elegance, mystery, and flavor of {{ site_settings.restaurant_name }}.
+        </p>
+        <a href="/reservations/" class="btn btn-gold">Book a Table</a>
+    </div>
+</section>
+
+{% endblock %}

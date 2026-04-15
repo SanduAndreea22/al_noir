@@ -1,0 +1,63 @@
+<footer class="footer">
+    <div class="container footer-container">
+
+        <!-- Brand -->
+        <div class="footer-column">
+            <h3>{{ site_settings.restaurant_name }}</h3>
+            <p>{{ site_settings.slogan }}</p>
+            <p>{{ site_settings.short_description }}</p>
+        </div>
+
+        <!-- Contact -->
+        <div class="footer-column">
+            <h4>Contact</h4>
+            <p>{{ site_settings.address }}</p>
+            <p>{{ site_settings.phone }}</p>
+            <p>{{ site_settings.email }}</p>
+        </div>
+
+        <!-- Opening Hours -->
+<div class="footer-column opening-hours">
+    <h4>Opening Hours</h4>
+
+    <div class="hours-row">
+        <span>Monday – Thursday</span>
+        <span>12:00 – 00:00</span>
+    </div>
+
+    <div class="hours-row">
+        <span>Friday – Saturday</span>
+        <span>12:00 – 05:00</span>
+    </div>
+
+    <div class="hours-row">
+        <span>Sunday</span>
+        <span>12:00 – 00:00</span>
+    </div>
+</div>
+
+        <!-- Social -->
+        <div class="footer-column">
+            <h4>Follow Us</h4>
+
+            {% if site_settings.instagram_url %}
+                <p><a href="{{ site_settings.instagram_url }}" target="_blank">Instagram</a></p>
+            {% endif %}
+
+            {% if site_settings.facebook_url %}
+                <p><a href="{{ site_settings.facebook_url }}" target="_blank">Facebook</a></p>
+            {% endif %}
+
+            {% if site_settings.tiktok_url %}
+                <p><a href="{{ site_settings.tiktok_url }}" target="_blank">TikTok</a></p>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- Bottom -->
+    <div class="footer-bottom">
+        <p>&copy; 2026 {{ site_settings.restaurant_name }}. All rights reserved.</p>
+    </div>
+</footer>

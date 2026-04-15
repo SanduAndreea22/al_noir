@@ -1,0 +1,28 @@
+<nav class="navbar">
+    <div class="container navbar-container">
+
+        <div class="navbar-left">
+            <a href="/" class="logo">
+                {% if site_settings.logo %}
+                    <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.restaurant_name }}">
+                {% else %}
+                    <span>{{ site_settings.restaurant_name }}</span>
+                {% endif %}
+            </a>
+        </div>
+
+        <div class="navbar-center">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+               <li><a href="/about/">Our Story</a></li>
+                <li><a href="/menu/">Menu</a></li>
+                <li><a href="/reviews/">Reviews</a></li>
+                <li><a href="/contact/">Contact</a></li>
+            </ul>
+        </div>
+
+        <div class="navbar-right">
+            <a href="/reservations/" class="reservation-btn">Reservations</a>
+        </div>
+    </div>
+</nav>

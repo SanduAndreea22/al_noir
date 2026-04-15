@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}{{ site_settings.restaurant_name }}{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    {% include 'partials/navbar.html' %}
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'partials/footer.html' %}
+
+</body>
+</html>
