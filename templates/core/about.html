@@ -1,10 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block title %}Our Story | {{ site_settings.restaurant_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero reveal">
+    <div class="container page-hero-content">
+        <p class="section-eyebrow">OUR STORY</p>
+        <h1>More Than a Restaurant. A Mood, A Memory, A Ritual.</h1>
+        <p>
+            {{ site_settings.restaurant_name }} was created for those who seek more than dining —
+            those who seek atmosphere, detail, and unforgettable evenings shaped by authentic Arab flavors.
+        </p>
+    </div>
+</section>
+
+<section class="content-section reveal">
+    <div class="container two-column-section">
+        <div class="text-column reveal">
+            <h2>The Beginning of {{ site_settings.restaurant_name }}</h2>
+            <p>
+                {{ site_settings.restaurant_name }} was born from the desire to create something deeper than a traditional dining space.
+                A place where authentic Arab cuisine meets elegance, warmth, and carefully crafted atmosphere.
+            </p>
+            <p>
+                Every detail — from the lighting to the presentation — is designed with intention,
+                transforming a simple dinner into a refined experience.
+            </p>
+        </div>
+
+        <div class="text-column reveal">
+            <h2>A Space Designed to Be Felt</h2>
+            <p>
+                We believe that dining is not just about food. It is about emotion, presence, and connection.
+            </p>
+            <p>
+                At {{ site_settings.restaurant_name }}, the ambiance, the silence between conversations,
+                and the warmth of hospitality all come together to create something memorable.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="content-section alt-bg reveal">
+    <div class="container">
+        <div class="feature-intro reveal">
+            <p class="section-eyebrow">WHAT WE BELIEVE</p>
+            <h2>Our Philosophy</h2>
+            <p>
+                We bring together flavor, atmosphere, and intention to create a dining experience that feels both authentic and refined.
+            </p>
+        </div>
+
+        <div class="feature-grid about-feature-grid">
+            <div class="feature-card reveal">
+                <h3>Authentic Flavor</h3>
+                <p>
+                    We honor rich Arab culinary traditions through flavors that are deep, memorable, and genuine.
+                </p>
+            </div>
+
+            <div class="feature-card reveal">
+                <h3>Refined Atmosphere</h3>
+                <p>
+                    Dining should create emotion — through design, lighting, and the subtle details that shape the experience.
+                </p>
+            </div>
+
+            <div class="feature-card reveal">
+                <h3>Meaningful Moments</h3>
+                <p>
+                    Whether it is a quiet dinner or a celebration, every visit should feel worth remembering.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content-section reveal">
+    <div class="container centered-text">
+        <p class="section-eyebrow">THE EXPERIENCE</p>
+        <h2>The Al Noir Experience</h2>
+        <p>
+            At {{ site_settings.restaurant_name }}, the experience begins before the first dish arrives.
+            It lives in the atmosphere, the attention to detail, and the balance between luxury and intimacy.
+        </p>
+        <p>
+            Every visit is designed to feel immersive, calm, and unforgettable.
+        </p>
+    </div>
+</section>
+
+<section class="quote-section reveal">
+    <div class="container">
+        <h2>
+            We do not simply serve food.<br>
+            We create evenings worth remembering.
+        </h2>
+    </div>
+</section>
+
+<section class="cta-section reveal">
+    <div class="container cta-content">
+        <p class="section-eyebrow">JOIN US</p>
+        <h2>Step Into the Experience</h2>
+        <p>
+            Discover a space where authentic Arab flavors meet elegance, atmosphere, and intention.
+        </p>
+        <a href="/reservations/" class="btn btn-gold">Book a Table</a>
+    </div>
+</section>
+
+{% endblock %}

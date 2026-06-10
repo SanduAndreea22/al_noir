@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+<script src="{% static 'js/reservations.js' %}"></script>
+<link rel="stylesheet"
+      href="{% static 'css/style.css' %}">
+
+{% block title %}
+Reservations | {{ site_settings.restaurant_name }}
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+    <div class="container page-hero-content">
+
+        <p class="section-eyebrow">
+            RESERVE YOUR EXPERIENCE
+        </p>
+
+        <h1>Book A Table</h1>
+
+        <p>
+            Reserve your table and optionally pre-select your favorite dishes
+            for a seamless dining experience.
+        </p>
+
+    </div>
+</section>
+
+<section class="content-section">
+
+    <div class="container">
+
+        <div class="feature-intro">
+
+            <p class="section-eyebrow">
+                RESERVATION FORM
+            </p>
+
+            <h2>
+                Plan Your Evening
+            </h2>
+
+        </div>
+
+        <div id="reservation-message"
+             class="contact-message-box"
+             style="display:none;">
+        </div>
+
+        <form
+            method="post"
+            id="reservation-form"
+        >
+
+            {% csrf_token %}
+
+            <div class="reservation-grid">
+
+                <div class="form-group">
+                    <label>Name</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    {{ form.email }}
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    {{ form.phone }}
+                </div>
+
+                <div class="form-group">
+                    <label>Guests</label>
+                    {{ form.guests }}
+                </div>
+
+                <div class="form-group">
+                    <label>Date</label>
+                    {{ form.reservation_date }}
+                </div>
+
+                <div class="form-group">
+                    <label>Time</label>
+                    {{ form.reservation_time }}
+                </div>
+
+            </div>
+
+            <div class="menu-selection">
+
+                <h2>
+                    Pre-Select Your Menu
+                </h2>
+
+                <p>
+                    Optional. Let us prepare your experience in advance.
+                </p>
+
+                {% for category in categories %}
+
+                <div class="menu-category-block">
+
+                    <h3>
+                        {{ category.name }}
+                    </h3>
+
+                    <div class="menu-items-grid">
+
+                        {% for item in category.items.all %}
+
+                        <label class="menu-item-option">
+
+                            <input
+                                type="checkbox"
+                                name="selected_items"
+                                value="{{ item.id }}"
+                            >
+
+                            <div class="menu-item-content">
+
+                                <h4>
+                                    {{ item.name }}
+                                </h4>
+
+                                <p>
+                                    {{ item.description }}
+                                </p>
+
+                                <span>
+                                    ${{ item.price }}
+                                </span>
+
+                            </div>
+
+                        </label>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Special Request
+                </label>
+
+                {{ form.special_request }}
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-gold reservation-btn"
+            >
+                Reserve Table
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}

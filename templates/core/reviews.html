@@ -1,10 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block title %}Reviews | {{ site_settings.restaurant_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <p class="section-eyebrow">GUEST REVIEWS</p>
+        <h1>What Our Guests Say</h1>
+        <p>
+            Discover the impressions, moments, and experiences shared by our guests.
+        </p>
+    </div>
+</section>
+
+<section class="content-section">
+    <div class="container">
+
+        <div class="feature-intro">
+            <p class="section-eyebrow">TESTIMONIALS</p>
+            <h2>Real Experiences, Memorable Evenings</h2>
+            <p>
+                Every review reflects the atmosphere, flavors, and moments that define the
+                {{ site_settings.restaurant_name }} experience.
+            </p>
+        </div>
+
+        <div class="reviews-grid">
+            {% for review in reviews %}
+                <div class="review-card reveal">
+                    <div class="review-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span>★</span>
+                            {% else %}
+                                <span class="star-muted">★</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <p class="review-text">“{{ review.review_text }}”</p>
+                    <h4>{{ review.name }}</h4>
+                </div>
+            {% empty %}
+                <div class="review-card reveal">
+                    <div class="review-stars">
+                        <span>★</span>
+                        <span>★</span>
+                        <span>★</span>
+                        <span>★</span>
+                        <span>★</span>
+                    </div>
+                    <p class="review-text">
+                        “Thank you for being one of the first guests to experience {{ site_settings.restaurant_name }}.
+                        Reviews will appear here soon.”
+                    </p>
+                    <h4>{{ site_settings.restaurant_name }}</h4>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="review-form-section reveal">
+            <div class="feature-intro">
+                <p class="section-eyebrow">SHARE YOUR EXPERIENCE</p>
+                <h2>Leave a Review</h2>
+                <p>
+                    Your review will be submitted for approval before it appears on the website.
+                </p>
+            </div>
+
+            <div id="review-message" class="contact-message-box" style="display: none;"></div>
+
+            <form method="post" id="review-form" novalidate>
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Name</label>
+                    {{ form.name }}
+                    <div class="field-error" id="error-name"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    <div class="field-error" id="error-email"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.review_text.id_for_label }}">Your Review</label>
+                    {{ form.review_text }}
+                    <div class="field-error" id="error-review_text"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.rating.id_for_label }}">Rating</label>
+                    {{ form.rating }}
+                    <div class="field-error" id="error-rating"></div>
+                </div>
+
+                <button type="submit" class="btn btn-gold contact-submit-btn" id="review-submit-btn">
+                    <span class="btn-text">Submit Review</span>
+                    <span class="btn-loading" style="display: none;">Sending...</span>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

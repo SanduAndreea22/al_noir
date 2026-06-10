@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- HERO MENU -->
+<section class="menu-hero">
+
+    <div class="menu-hero-overlay"></div>
+
+    <div class="menu-hero-content">
+        <h1>MENU</h1>
+
+        <div class="menu-categories">
+            {% for category in categories %}
+                <button type="button"
+                        class="menu-btn {% if forloop.first %}active{% endif %}"
+                        data-category="cat-{{ category.id }}">
+                    {{ category.name }}
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- MENU CONTENT -->
+<section class="menu-content-section">
+    <div class="container">
+
+        {% for category in categories %}
+        <div class="menu-category {% if forloop.first %}active{% endif %}"
+             id="cat-{{ category.id }}">
+
+            <div class="menu-category-header">
+                <h2>{{ category.name }}</h2>
+                <div class="divider"></div>
+            </div>
+
+            <div class="menu-items">
+
+                {% for item in category.items.all %}
+                    {% if item.is_available %}
+
+                    <div class="menu-item">
+
+                        <div class="menu-item-left">venv\Scripts\activate
+                            <h3>{{ item.name }}</h3>
+                            <p>{{ item.description }}</p>
+                        </div>
+
+                        <div class="menu-item-right">
+                            <span class="price">${{ item.price }}</span>
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+</section>
+
+{% endblock %}

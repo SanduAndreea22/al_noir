@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Reservation</h1>
+
+<form id="reservationForm">
+
+<input type="date" id="date">
+<input type="number" id="guests">
+
+<select id="time"></select>
+
+<!-- MENIU DIN API -->
+<div id="menu"></div>
+
+<button type="submit">Book</button>
+
+</form>
+
+<script>
+// LOAD TIMES
+document.getElementById("date").addEventListener("change", async () => {
+    const date = document.getElementById("date").value;
+    const guests = document.getElementById("guests").value || 1;
+
+    const res = await fetch(`/api/available-times/?date=${date}&guests=${guests}`);
+    const data = await res.json();
+
+    const timeSelect = document.getElementById("time");
+    timeSelect.innerHTML = "";
+
+    data.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.innerText = t;
+        timeSelect.appendChild(opt);
+    });
+});
+
+
+// SUBMIT
+document.getElementById("reservationForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        guests: document.getElementById("guests").value,
+        items: []
+    };
+
+    const res = await fetch("/api/reservations/create/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    });
+
+    alert(res.ok ? "Success" : "Error");
+});
+</script>
+
+{% endblock %}

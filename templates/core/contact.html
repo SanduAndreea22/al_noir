@@ -1,10 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block title %}Contact | {{ site_settings.restaurant_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <p class="section-eyebrow">CONTACT</p>
+        <h1>Get in Touch</h1>
+        <p>
+            We would love to hear from you. Reach out for reservations, private events, or general inquiries.
+        </p>
+    </div>
+</section>
+
+<section class="contact-section">
+    <div class="container contact-grid">
+
+        <div class="contact-info-card reveal">
+            <h2>Contact Information</h2>
+            <p><strong>Address:</strong> {{ site_settings.address }}</p>
+            <p><strong>Phone:</strong> {{ site_settings.phone }}</p>
+            <p><strong>Email:</strong> {{ site_settings.email }}</p>
+            <p><strong>Opening Hours:</strong> {{ site_settings.opening_hours }}</p>
+        </div>
+
+        <div class="contact-form-card reveal">
+            <h2>Send a Message</h2>
+
+            <div id="form-message" class="contact-message-box" style="display: none;"></div>
+
+            <form method="post" id="contact-form" novalidate>
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Name</label>
+                    {{ form.name }}
+                    <div class="field-error" id="error-name"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    <div class="field-error" id="error-email"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.phone.id_for_label }}">Phone</label>
+                    {{ form.phone }}
+                    <div class="field-error" id="error-phone"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.subject.id_for_label }}">Subject</label>
+                    {{ form.subject }}
+                    <div class="field-error" id="error-subject"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.message.id_for_label }}">Message</label>
+                    {{ form.message }}
+                    <div class="field-error" id="error-message"></div>
+                </div>
+
+                <button type="submit" class="btn btn-gold contact-submit-btn" id="submit-btn">
+                    <span class="btn-text">Send Message</span>
+                    <span class="btn-loading" style="display: none;">Sending...</span>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
