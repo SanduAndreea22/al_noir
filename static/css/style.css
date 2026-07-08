@@ -1081,6 +1081,15 @@ textarea.form-control {
     font-weight: bold;
 }
 
+.menu-hero-overlay {
+    pointer-events: none;
+}
+
+.menu-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
 .reservation-btn {
     margin-top: 30px;
 }
@@ -1111,4 +1120,228 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
 
+}
+
+/* ==========================
+   RESERVATIONS
+========================== */
+
+.reservation-section {
+    padding: 120px 0;
+    background: #0b0b0b;
+}
+
+.reservation-container {
+    width: 90%;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.reservation-title {
+    text-align: center;
+    color: #d4af37;
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.reservation-subtitle {
+    text-align: center;
+    color: #b5b5b5;
+    margin-bottom: 60px;
+    font-size: 1.1rem;
+}
+
+.reservation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.reservation-card {
+    background: #151515;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 15px;
+    padding: 35px;
+}
+
+.reservation-card h2 {
+    color: #d4af37;
+    margin-bottom: 30px;
+    font-size: 1.6rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px;
+    background: #1d1d1d;
+    border: 1px solid #2d2d2d;
+    color: white;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #d4af37;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+}
+
+.form-control::placeholder {
+    color: #999;
+}
+
+.category-block {
+    margin-bottom: 35px;
+}
+
+.category-title {
+    color: #d4af37;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.menu-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.menu-checkbox:hover {
+    color: #d4af37;
+}
+
+.menu-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.reservation-submit {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.reserve-btn {
+    background: #d4af37;
+    color: black;
+    border: none;
+    padding: 16px 45px;
+    border-radius: 8px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.reserve-btn:hover {
+    transform: translateY(-3px);
+}
+
+#reservation-message {
+    margin-top: 30px;
+}
+
+.success-message {
+    background: rgba(34, 139, 34, 0.2);
+    border: 1px solid green;
+    color: #d8ffd8;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.error-message {
+    background: rgba(255, 0, 0, 0.15);
+    border: 1px solid #8b0000;
+    color: #ffd8d8;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+
+    .reservation-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .reservation-title {
+        font-size: 2.5rem;
+    }
+
+}
+
+/* static/css/reservations.css */
+
+.container {
+    max-width: 700px;
+}
+
+h1 {
+    color: #d4af37;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+form {
+    background: #1a1a1a;
+    padding: 2rem;
+    border: 1px solid #444;
+    border-radius: 12px;
+}
+
+.form-label {
+    color: #fff;
+    font-weight: 600;
+}
+
+.form-control {
+    background: #2b2b2b;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.form-control:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.btn-dark {
+    background: #d4af37;
+    border: none;
+    color: #111;
+    font-weight: 700;
+}
+
+.btn-dark:hover {
+    background: #c39c27;
+}
+
+.alert-success {
+    background: #1f4d2b;
+    color: #fff;
+    border: none;
+}
+
+.text-danger {
+    color: #7CFC00 !important;
 }

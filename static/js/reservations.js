@@ -1,58 +1,85 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-    const form = document.getElementById('reservation-form');
+    const form = document.getElementById(
+        'reservation-form'
+    );
 
-    if (!form) return;
+    const messageBox = document.getElementById(
+        'reservation-message'
+    );
 
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener(
+        'submit',
+        function (e) {
 
-        e.preventDefault();
+            e.preventDefault();
 
-        const formData = new FormData(form);
+            const formData = new FormData(
+                form
+            );
 
-        const response = await fetch('', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
+            fetch(
+                window.location.href,
+                {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            )
 
-        const data = await response.json();
+            .then(response => response.json())
 
-        const messageBox = document.getElementById(
-            'reservation-message'
-        );
+            .then(data => {
 
-        if (data.success) {
+                if (data.success) {
 
-            messageBox.style.display = 'block';
+                    messageBox.innerHTML = `
+                        <div class="success-message">
+                            ${data.message}
+                        </div>
+                    `;
 
-            messageBox.className =
-                'contact-message-box success-message';
+                    form.reset();
 
-            messageBox.innerHTML =
-                '✨ Your reservation has been submitted successfully. We look forward to welcoming you.';
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
 
-            form.reset();
+                } else {
 
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+                    let errors = '';
+
+                    for (const field in data.errors) {
+
+                        errors += `
+                            <p>${data.errors[field]}</p>
+                        `;
+                    }
+
+                    messageBox.innerHTML = `
+                        <div class="error-message">
+                            ${errors}
+                        </div>
+                    `;
+                }
+
+            })
+
+            .catch(error => {
+
+                messageBox.innerHTML = `
+                    <div class="error-message">
+                        Something went wrong.
+                        Please try again.
+                    </div>
+                `;
+
             });
 
-        } else {
-
-            messageBox.style.display = 'block';
-
-            messageBox.className =
-                'contact-message-box error-message';
-
-            messageBox.innerHTML =
-                'Please check your reservation details and try again.';
-
         }
-
-    });
+    );
 
 });

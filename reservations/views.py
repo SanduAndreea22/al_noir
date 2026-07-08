@@ -1,59 +1,42 @@
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
 from menu.models import Category
-from menu.models import MenuItem
-
 from .forms import ReservationForm
 
 
 def reservations(request):
 
     categories = Category.objects.prefetch_related(
-        'items'
+        "items"
     ).all()
 
-    if request.method == 'POST':
+    if request.method == "POST":
 
-        form = ReservationForm(
-            request.POST
-        )
+        form = ReservationForm(request.POST)
 
         if form.is_valid():
 
-            reservation = form.save()
+            form.save()
 
-            selected_items = request.POST.getlist(
-                'selected_items'
+            messages.success(
+                request,
+                "Your reservation has been sent successfully! We will confirm it shortly."
             )
 
-            items = MenuItem.objects.filter(
-                id__in=selected_items
-            )
+            return redirect("reservations:reservations")
 
-            reservation.selected_items.set(
-                items
-            )
+    else:
 
-            return JsonResponse({
-                'success': True,
-                'message': (
-                    'Your reservation has been submitted successfully.'
-                )
-            })
+        form = ReservationForm()
 
-        return JsonResponse({
-            'success': False,
-            'errors': form.errors
-        })
-
-    form = ReservationForm()
+    context = {
+        "form": form,
+        "categories": categories,
+    }
 
     return render(
         request,
-        'reservations/reservations.html',
-        {
-            'form': form,
-            'categories': categories,
-        }
+        "reservations/reservations.html",
+        context,
     )
