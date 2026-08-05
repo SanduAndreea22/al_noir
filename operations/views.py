@@ -90,8 +90,13 @@ def staff_dashboard(request):
     sales_total = Sale.objects.aggregate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
     advance_total = Reservation.objects.filter(advance_paid=True).aggregate(total=Sum('advance_amount'))['total'] or Decimal('0')
     ticket_total = Ticket.objects.filter(paid=True).aggregate(total=Sum(ExpressionWrapper(F('event__ticket_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
-    expenses_total = Expense.objects.filter(paid=True).aggregate(total=Sum('amount'))['total'] or Decimal('0')
-    return render(request, 'operations/staff_dashboard.html', {'sales_total': sales_total, 'advance_total': advance_total, 'ticket_total': ticket_total, 'expenses_total': expenses_total, 'profit': sales_total + advance_total + ticket_total - expenses_total, 'low_stock': StockItem.objects.filter(quantity__lt=F('minimum_quantity')), 'expired_stock': StockItem.objects.filter(expiry_date__lt=timezone.localdate()), 'pending_reservations': Reservation.objects.filter(status='pending').count(), 'invoices': Invoice.objects.all()[:5]})
+    paid_expenses = Expense.objects.filter(paid=True)
+    expenses_total = paid_expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    expense_by_category = [
+        (label, paid_expenses.filter(category=code).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
+        for code, label in Expense.CATEGORIES
+    ]
+    return render(request, 'operations/staff_dashboard.html', {'sales_total': sales_total, 'advance_total': advance_total, 'ticket_total': ticket_total, 'expenses_total': expenses_total, 'expense_by_category': expense_by_category, 'profit': sales_total + advance_total + ticket_total - expenses_total, 'low_stock': StockItem.objects.filter(quantity__lt=F('minimum_quantity')), 'expired_stock': StockItem.objects.filter(expiry_date__lt=timezone.localdate()), 'pending_reservations': Reservation.objects.filter(status='pending').count(), 'invoices': Invoice.objects.all()[:5]})
 
 
 @staff_member_required
@@ -107,13 +112,34 @@ def reports(request):
     start = parse_date(request.GET.get('start'), today.replace(day=1))
     end = parse_date(request.GET.get('end'), today)
     start, end = (start, end) if start <= end else (end, start)
+
     sales = Sale.objects.filter(created_at__date__range=(start, end))
+    tickets = Ticket.objects.filter(paid=True, created_at__date__range=(start, end))
+    advances = Reservation.objects.filter(advance_paid=True, created_at__date__range=(start, end))
     expenses = Expense.objects.filter(expense_date__range=(start, end), paid=True)
-    revenue = sales.aggregate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
-    expense_total = expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+    sales_revenue = sales.aggregate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
+    ticket_revenue = tickets.aggregate(total=Sum(ExpressionWrapper(F('event__ticket_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
+    advance_revenue = advances.aggregate(total=Sum('advance_amount'))['total'] or Decimal('0')
+    revenue = sales_revenue + ticket_revenue + advance_revenue
+
+    expense_by_category = [
+        (label, expenses.filter(category=code).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
+        for code, label in Expense.CATEGORIES
+    ]
+    expense_total = sum((total for _, total in expense_by_category), Decimal('0'))
+
     daily_sales = sales.annotate(day=TruncDate('created_at')).values('day').annotate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2)))).order_by('day')
     top_items = sales.values('menu_item__name').annotate(total_quantity=Sum('quantity'), revenue=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2)))).order_by('-total_quantity')[:10]
-    return render(request, 'operations/reports.html', {'start': start, 'end': end, 'revenue': revenue, 'expenses': expense_total, 'profit': revenue - expense_total, 'daily_sales': daily_sales, 'top_items': top_items})
+
+    return render(request, 'operations/reports.html', {
+        'start': start, 'end': end,
+        'sales_revenue': sales_revenue, 'ticket_revenue': ticket_revenue, 'advance_revenue': advance_revenue,
+        'revenue': revenue,
+        'expense_by_category': expense_by_category, 'expenses': expense_total,
+        'profit': revenue - expense_total,
+        'daily_sales': daily_sales, 'top_items': top_items,
+    })
 
 
 @staff_member_required
