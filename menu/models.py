@@ -19,6 +19,10 @@ class MenuItem(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_available = models.BooleanField(default=True)
+    is_loyalty_reward = models.BooleanField(
+        default=False,
+        help_text='Poate fi oferit ca desert gratuit prin programul de loialitate.'
+    )
 
     def __str__(self):
         return f"{self.name} - {self.category.name}"

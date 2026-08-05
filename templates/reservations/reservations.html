@@ -7,14 +7,6 @@
 <section class="container py-5">
     <h1 class="mb-4">Reserve a Table</h1>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <form method="post" novalidate>
         {% csrf_token %}
 
@@ -33,6 +25,11 @@
             </div>
         {% endfor %}
 
+        <div class="mb-3" id="advance-summary" aria-live="polite">
+            Total produse: <strong id="menu-total">0.00 lei</strong><br>
+            Avans rezervare (10%): <strong id="advance-total">0.00 lei</strong>
+        </div>
+
         {% if form.non_field_errors %}
             <div class="alert alert-danger">
                 {{ form.non_field_errors }}
@@ -44,4 +41,5 @@
         </button>
     </form>
 </section>
+<script src="{% static 'js/reservation-deposit.js' %}" defer></script>
 {% endblock %}

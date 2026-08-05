@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
@@ -12,11 +13,11 @@
 
         <div class="menu-categories">
             {% for category in categories %}
-                <button type="button"
-                        class="menu-btn {% if forloop.first %}active{% endif %}"
-                        data-category="cat-{{ category.id }}">
+                <a href="#cat-{{ category.id }}"
+                   class="menu-btn {% if forloop.first %}active{% endif %}"
+                   data-category="cat-{{ category.id }}">
                     {{ category.name }}
-                </button>
+                </a>
             {% endfor %}
         </div>
     </div>
@@ -63,5 +64,7 @@
 
     </div>
 </section>
+
+<script src="{% static 'js/menu.js' %}?v=3" defer></script>
 
 {% endblock %}

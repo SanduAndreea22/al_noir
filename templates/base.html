@@ -8,9 +8,8 @@
 
     <title>{% block title %}{{ site_settings.restaurant_name }}{% endblock %}</title>
 
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v=3">
 <script src="{% static 'js/main.js' %}" defer></script>
-<script src="{% static 'js/menu.js' %}?v=2" defer></script>
 
 </head>
 <body>
@@ -18,6 +17,14 @@
     {% include 'partials/navbar.html' %}
 
     <main>
+        {% if messages %}
+            <div class="container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% block content %}
         {% endblock %}
     </main>

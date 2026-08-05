@@ -1,11 +1,14 @@
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 from django import forms
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from menu.models import MenuItem
 
 from .models import Reservation, Table
+from operations.models import PromoCode
 
 
 TIME_CHOICES = [
@@ -19,6 +22,16 @@ TIME_CHOICES = [
     ("21:30", "21:30"),
     ("22:00", "22:00"),
 ]
+
+
+class PricingCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+    """Adds a machine-readable price to each menu checkbox for the live total."""
+    prices = {}
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        option['attrs']['data-price'] = str(self.prices.get(str(value), 0))
+        return option
 
 
 class ReservationForm(forms.ModelForm):
@@ -40,6 +53,7 @@ class ReservationForm(forms.ModelForm):
             "guests",
             "selected_items",
             "special_request",
+            "promo_code",
         ]
 
         widgets = {
@@ -78,6 +92,10 @@ class ReservationForm(forms.ModelForm):
                 "rows": 4,
                 "placeholder": "Special requests..."
             }),
+
+            "promo_code": forms.TextInput(attrs={
+                "class": "form-control", "placeholder": "ex. WELCOME10"
+            }),
         }
 
     def __init__(self, *args, **kwargs):
@@ -87,6 +105,10 @@ class ReservationForm(forms.ModelForm):
         self.fields["selected_items"].queryset = MenuItem.objects.filter(
             is_available=True
         )
+        widget = PricingCheckboxSelectMultiple()
+        widget.prices = {str(item.pk): item.price for item in self.fields['selected_items'].queryset}
+        self.fields['selected_items'].widget = widget
+        self.fields['selected_items'].widget.choices = self.fields['selected_items'].choices
 
     def clean(self):
 
@@ -96,8 +118,11 @@ class ReservationForm(forms.ModelForm):
         reservation_time = cleaned_data.get("reservation_time")
         guests = cleaned_data.get("guests")
 
-        if not reservation_date or not reservation_time or not guests:
+        if reservation_date is None or reservation_time is None or guests is None:
             return cleaned_data
+
+        if guests < 1:
+            raise forms.ValidationError("Numărul de persoane trebuie să fie cel puțin 1.")
 
         reservation_time_obj = datetime.strptime(
             reservation_time,
@@ -149,6 +174,17 @@ class ReservationForm(forms.ModelForm):
 
         self.selected_table = selected_table
 
+        promo_value = cleaned_data.get('promo_code', '').strip().upper()
+        if promo_value:
+            try:
+                promo = PromoCode.objects.get(code__iexact=promo_value)
+                if not promo.is_valid():
+                    raise forms.ValidationError('Codul promoțional nu este activ sau nu mai este valabil.')
+                cleaned_data['promo_code'] = promo.code
+                self.promo = promo
+            except PromoCode.DoesNotExist:
+                raise forms.ValidationError('Cod promoțional invalid.')
+
         return cleaned_data
 
     def save(self, commit=True):
@@ -162,9 +198,27 @@ class ReservationForm(forms.ModelForm):
             "%H:%M"
         ).time()
 
+        promo = getattr(self, 'promo', None)
+        selected_items = self.cleaned_data.get('selected_items')
+        reservation.advance_amount = sum((item.price for item in selected_items), start=Decimal('0')) * Decimal('0.10')
+        if promo:
+            reservation.discount_amount = promo.discount_for(reservation.advance_amount)
+            reservation.advance_amount = max(0, reservation.advance_amount - reservation.discount_amount)
+            if promo.discount_type == PromoCode.FREE_ITEM:
+                reservation.promo_free_item = promo.free_item
+
         if commit:
 
-            reservation.save()
+            try:
+                with transaction.atomic():
+                    if promo:
+                        locked_promo = PromoCode.objects.select_for_update().get(pk=promo.pk)
+                        if not locked_promo.is_valid():
+                            raise forms.ValidationError('Codul promoțional tocmai a expirat sau a atins limita de utilizări.')
+                        locked_promo.register_use()
+                    reservation.save()
+            except IntegrityError:
+                raise forms.ValidationError('Ne pare rău, masa a fost rezervată de altcineva chiar acum. Încearcă alt interval orar.')
 
             self.save_m2m()
 

@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     buttons.forEach(button => {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+
             buttons.forEach(btn => btn.classList.remove("active"));
             categories.forEach(cat => cat.classList.remove("active"));
 
@@ -17,6 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (target) {
                 target.classList.add("active");
+                history.replaceState(null, "", `#${target.id}`);
             }
 
             if (menuContent) {

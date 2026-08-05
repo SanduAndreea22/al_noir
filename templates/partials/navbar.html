@@ -1,3 +1,4 @@
+{% load i18n %}
 <nav class="navbar">
     <div class="container navbar-container">
 
@@ -18,11 +19,19 @@
                 <li><a href="/menu/">Menu</a></li>
                 <li><a href="/reviews/">Reviews</a></li>
                 <li><a href="/contact/">Contact</a></li>
+                <li><a href="/operations/events/">Evenimente</a></li>
+                <li><a href="/operations/waitlist/">Listă de așteptare</a></li>
             </ul>
         </div>
 
         <div class="navbar-right">
+            {% if user.is_authenticated %}
+                <a href="/operations/client/" class="reservation-btn">Contul meu</a>
+            {% else %}
+                <a href="/login/" class="reservation-btn">Login</a>
+            {% endif %}
             <a href="/reservations/" class="reservation-btn">Reservations</a>
+            <form action="{% url 'set_language' %}" method="post" class="language-form">{% csrf_token %}<input name="next" type="hidden" value="{{ request.get_full_path }}"><select name="language" onchange="this.form.submit()"><option value="ro" {% if LANGUAGE_CODE == 'ro' %}selected{% endif %}>RO</option><option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option></select></form>
         </div>
     </div>
 </nav>

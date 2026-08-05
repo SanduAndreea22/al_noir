@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block content %}<section class="container py-5"><h1>Lista de așteptare</h1><p>Dacă nu găsești o masă disponibilă, lasă datele tale și te contactăm când se eliberează una.</p><form method="post">{% csrf_token %}{% for field in form %}<div class="mb-3"><label>{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}<button class="btn btn-dark">Înscrie-mă</button></form></section>{% endblock %}

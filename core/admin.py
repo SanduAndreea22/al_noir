@@ -4,9 +4,6 @@ from .models import SiteSettings, ContactMessage, Review
 admin.site.register(SiteSettings)
 admin.site.register(Review)
 
-from django.contrib import admin
-from .models import ContactMessage
-
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):

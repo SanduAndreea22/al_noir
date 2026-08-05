@@ -46,6 +46,10 @@ class ReservationAdmin(admin.ModelAdmin):
         "guests",
         "table",
         "status",
+        "advance_amount",
+        "advance_paid",
+        "promo_code",
+        "promo_free_item",
         "created_at",
     )
 

@@ -1,8 +1,11 @@
 from .forms import ContactMessageForm
-from django.shortcuts import render
-from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from .models import Review
 from .forms import ReviewForm
+from .utils import form_json_response, is_ajax
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 
 
 def home(request):
@@ -17,18 +20,15 @@ def about(request):
 def contact(request):
     if request.method == 'POST':
         form = ContactMessageForm(request.POST)
+        if is_ajax(request):
+            return form_json_response(form, 'Your message has been sent successfully.')
         if form.is_valid():
             form.save()
-            return JsonResponse({
-                'success': True,
-                'message': 'Your message has been sent successfully.'
-            })
-        return JsonResponse({
-            'success': False,
-            'errors': form.errors
-        }, status=400)
+            messages.success(request, 'Your message has been sent successfully.')
+            return redirect('contact')
+    else:
+        form = ContactMessageForm()
 
-    form = ContactMessageForm()
     return render(request, 'core/contact.html', {
         'form': form
     })
@@ -38,20 +38,35 @@ def reviews(request):
 
     if request.method == 'POST':
         form = ReviewForm(request.POST)
+        if is_ajax(request):
+            return form_json_response(form, 'Thank you! Your review will be visible after approval.')
         if form.is_valid():
             form.save()
-            return JsonResponse({
-                'success': True,
-                'message': 'Thank you! Your review will be visible after approval.'
-            })
-        return JsonResponse({
-            'success': False,
-            'errors': form.errors
-        }, status=400)
-
-    form = ReviewForm()
+            messages.success(request, 'Thank you! Your review will be visible after approval.')
+            return redirect('reviews')
+    else:
+        form = ReviewForm()
 
     return render(request, 'core/reviews.html', {
         'reviews': reviews_list,
         'form': form
     })
+
+
+def privacy(request):
+    return render(request, 'core/privacy.html')
+
+def terms(request):
+    return render(request, 'core/terms.html')
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('operations:client_dashboard')
+    form = UserCreationForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = form.save()
+        login(request, user)
+        messages.success(request, 'Contul tău a fost creat.')
+        return redirect('operations:client_dashboard')
+    return render(request, 'registration/register.html', {'form': form})

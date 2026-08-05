@@ -9,5 +9,5 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'is_available')
-    list_filter = ('category', 'is_available')
+    list_display = ('name', 'category', 'price', 'is_available', 'is_loyalty_reward')
+    list_filter = ('category', 'is_available', 'is_loyalty_reward')

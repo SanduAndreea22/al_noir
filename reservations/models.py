@@ -1,4 +1,11 @@
+import secrets
+
 from django.db import models
+from django.contrib.auth.models import User
+
+
+def generate_access_token():
+    return secrets.token_urlsafe(32)
 
 
 class Table(models.Model):
@@ -48,6 +55,8 @@ class Reservation(models.Model):
         related_name="reservations",
     )
 
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="reservations")
+
     name = models.CharField(max_length=150)
 
     email = models.EmailField()
@@ -77,6 +86,17 @@ class Reservation(models.Model):
         default="pending",
     )
 
+    advance_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    advance_paid = models.BooleanField(default=False)
+    access_token = models.CharField(max_length=43, default=generate_access_token, editable=False, unique=True)
+    stripe_checkout_session_id = models.CharField(max_length=255, blank=True)
+    promo_code = models.CharField(max_length=40, blank=True)
+    discount_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    promo_free_item = models.ForeignKey(
+        'menu.MenuItem', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='promo_reservations'
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -92,6 +112,13 @@ class Reservation(models.Model):
         ]
         verbose_name = "Reservation"
         verbose_name_plural = "Reservations"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["table", "reservation_date", "reservation_time"],
+                condition=models.Q(status__in=["pending", "confirmed"]),
+                name="unique_active_table_slot",
+            ),
+        ]
 
     def __str__(self):
         return (
