@@ -4,7 +4,7 @@ djangorestframework==3.17.1
 stripe==15.3.0
 python-dotenv==1.0.1
 dj-database-url==2.3.0
-psycopg[binary]==3.2.3
+psycopg[binary]==3.2.10
 gunicorn==23.0.0
 whitenoise==6.8.2
 django-cloudinary-storage==0.3.0
