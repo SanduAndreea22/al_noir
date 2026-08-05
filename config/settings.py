@@ -180,14 +180,23 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
 else:
     DEFAULT_MEDIA_BACKEND = 'django.core.files.storage.FileSystemStorage'
 
+STATICFILES_STORAGE_BACKEND = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Django's storage engine (post_process, file resolution, etc.) reads STORAGES
+# exclusively; it no longer derives it from the settings below.
 STORAGES = {
     'default': {
         'BACKEND': DEFAULT_MEDIA_BACKEND,
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': STATICFILES_STORAGE_BACKEND,
     },
 }
+
+# django-cloudinary-storage's collectstatic override only checks these legacy
+# flat settings (not STORAGES) to decide whether to copy unhashed static files.
+DEFAULT_FILE_STORAGE = DEFAULT_MEDIA_BACKEND
+STATICFILES_STORAGE = STATICFILES_STORAGE_BACKEND
 
 from django.contrib.messages import constants as message_constants
 MESSAGE_TAGS = {

@@ -2,7 +2,7 @@ services:
   - type: web
     name: al-noir
     runtime: python
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput --upload-unhashed-files"
     preDeployCommand: "python manage.py migrate --noinput && python manage.py ensure_superuser"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
@@ -39,4 +39,4 @@ services:
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
       - key: PYTHON_VERSION
-        value: "3.13.14"
+        value: "3.13.4"
