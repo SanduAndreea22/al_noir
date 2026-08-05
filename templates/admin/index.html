@@ -1,0 +1,9 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+<div class="module" style="margin-bottom: 20px; padding: 15px;">
+    <a href="{% url 'operations:staff_dashboard' %}" class="button">📊 Dashboard staff (vânzări, profit, stoc)</a>
+    <a href="{% url 'operations:reports' %}" class="button" style="margin-left: 10px;">📈 Rapoarte financiare</a>
+</div>
+{{ block.super }}
+{% endblock %}
