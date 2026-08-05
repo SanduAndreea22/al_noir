@@ -156,7 +156,7 @@ def invoice_pdf(request, pk):
         transliterate_ro(line) for line in [
             'AL NOIR - INVOICE', f'Number: {invoice.number}', f'Date: {invoice.issued_at:%d.%m.%Y}',
             f'Client: {invoice.customer_name}', f'Description: {invoice.description}',
-            f'Total: {invoice.amount:.2f} RON', 'Status: PAID' if invoice.paid else 'Status: UNPAID',
+            f'Total: ${invoice.amount:.2f}', 'Status: PAID' if invoice.paid else 'Status: UNPAID',
         ]
     ]
     def esc(value): return value.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')

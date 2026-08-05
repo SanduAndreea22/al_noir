@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const total = Array.from(priceInputs)
       .filter((input) => input.checked)
       .reduce((sum, input) => sum + Number.parseFloat(input.dataset.price || '0'), 0);
-    menuTotal.textContent = `${total.toFixed(2)} lei`;
-    advanceTotal.textContent = `${(total * 0.10).toFixed(2)} lei`;
+    menuTotal.textContent = `$${total.toFixed(2)}`;
+    advanceTotal.textContent = `$${(total * 0.10).toFixed(2)}`;
   };
 
   priceInputs.forEach((input) => input.addEventListener('change', updateDeposit));

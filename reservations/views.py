@@ -73,7 +73,7 @@ def checkout(request, pk, token):
             mode='payment',
             payment_method_types=['card'],
             customer_email=reservation.email,
-            line_items=[{'price_data': {'currency': 'ron', 'product_data': {'name': f'Al Noir reservation deposit #{reservation.pk}'}, 'unit_amount': int(reservation.advance_amount * 100)}, 'quantity': 1}],
+            line_items=[{'price_data': {'currency': 'usd', 'product_data': {'name': f'Al Noir reservation deposit #{reservation.pk}'}, 'unit_amount': int(reservation.advance_amount * 100)}, 'quantity': 1}],
             metadata={'reservation_id': str(reservation.pk)},
             success_url=request.build_absolute_uri(reverse('reservations:payment_success', args=[reservation.pk])) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=request.build_absolute_uri(reverse('reservations:reservations')),
