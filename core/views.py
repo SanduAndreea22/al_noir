@@ -67,6 +67,6 @@ def register(request):
     if request.method == 'POST' and form.is_valid():
         user = form.save()
         login(request, user)
-        messages.success(request, 'Contul tău a fost creat.')
+        messages.success(request, 'Your account has been created.')
         return redirect('operations:client_dashboard')
     return render(request, 'registration/register.html', {'form': form})

@@ -64,7 +64,7 @@ def checkout(request, pk, token):
     if reservation.advance_paid or reservation.advance_amount <= 0:
         return redirect("reservations:reservations")
     if not settings.STRIPE_SECRET_KEY:
-        messages.error(request, "Plata online nu este configurată încă. Rezervarea a fost înregistrată, iar echipa noastră te va contacta.")
+        messages.error(request, "Online payment isn't configured yet. Your reservation has been recorded and our team will contact you.")
         return redirect("reservations:reservations")
     try:
         import stripe
@@ -73,13 +73,13 @@ def checkout(request, pk, token):
             mode='payment',
             payment_method_types=['card'],
             customer_email=reservation.email,
-            line_items=[{'price_data': {'currency': 'ron', 'product_data': {'name': f'Avans rezervare Al Noir #{reservation.pk}'}, 'unit_amount': int(reservation.advance_amount * 100)}, 'quantity': 1}],
+            line_items=[{'price_data': {'currency': 'ron', 'product_data': {'name': f'Al Noir reservation deposit #{reservation.pk}'}, 'unit_amount': int(reservation.advance_amount * 100)}, 'quantity': 1}],
             metadata={'reservation_id': str(reservation.pk)},
             success_url=request.build_absolute_uri(reverse('reservations:payment_success', args=[reservation.pk])) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=request.build_absolute_uri(reverse('reservations:reservations')),
         )
     except ImportError:
-        messages.error(request, "Modulul Stripe nu este instalat pe server.")
+        messages.error(request, "The Stripe module is not installed on the server.")
         return redirect("reservations:reservations")
     reservation.stripe_checkout_session_id = session.id
     reservation.save(update_fields=['stripe_checkout_session_id'])
@@ -98,9 +98,9 @@ def payment_success(request, pk):
                 reservation.advance_paid = True
                 reservation.save(update_fields=['advance_paid'])
         except Exception:
-            messages.warning(request, 'Plata este în verificare. Te vom contacta pentru confirmare.')
+            messages.warning(request, 'Your payment is being verified. We will contact you to confirm.')
             return redirect('operations:client_dashboard' if request.user.is_authenticated else 'reservations:reservations')
-    messages.success(request, 'Mulțumim! Plata avansului a fost confirmată.')
+    messages.success(request, 'Thank you! Your deposit payment has been confirmed.')
     return redirect('operations:client_dashboard' if request.user.is_authenticated else 'reservations:reservations')
 
 
@@ -109,14 +109,14 @@ def stripe_webhook(request):
     """Authoritative Stripe payment confirmation, including cases without a browser redirect."""
     from .models import Reservation
     if request.method != 'POST' or not settings.STRIPE_WEBHOOK_SECRET:
-        return HttpResponseBadRequest('Webhook indisponibil.')
+        return HttpResponseBadRequest('Webhook unavailable.')
     try:
         import stripe
         event = stripe.Webhook.construct_event(
             request.body, request.META.get('HTTP_STRIPE_SIGNATURE', ''), settings.STRIPE_WEBHOOK_SECRET
         )
     except (ImportError, ValueError, Exception):
-        return HttpResponseBadRequest('Semnătură invalidă.')
+        return HttpResponseBadRequest('Invalid signature.')
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         reservation_id = session.get('metadata', {}).get('reservation_id')

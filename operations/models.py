@@ -34,7 +34,7 @@ class StockItem(models.Model):
 
 class StockMovement(models.Model):
     PURCHASE, SALE, WASTE, ADJUSTMENT = 'purchase', 'sale', 'waste', 'adjustment'
-    TYPES = [(PURCHASE, 'Aprovizionare'), (SALE, 'Vânzare'), (WASTE, 'Pierdere/expirat'), (ADJUSTMENT, 'Ajustare')]
+    TYPES = [(PURCHASE, 'Purchase'), (SALE, 'Sale'), (WASTE, 'Waste/Expired'), (ADJUSTMENT, 'Adjustment')]
     item = models.ForeignKey(StockItem, on_delete=models.PROTECT, related_name='movements')
     movement_type = models.CharField(max_length=20, choices=TYPES)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
@@ -46,7 +46,7 @@ class StockMovement(models.Model):
 
     def save(self, *args, **kwargs):
         if self.pk:
-            raise ValueError('Mișcările de stoc nu se editează; creează o ajustare nouă.')
+            raise ValueError('Stock movements cannot be edited; create a new adjustment instead.')
         delta = self.quantity if self.movement_type in (self.PURCHASE, self.ADJUSTMENT) else -self.quantity
         with transaction.atomic():
             item = StockItem.objects.select_for_update().get(pk=self.item_id)
@@ -57,7 +57,7 @@ class StockMovement(models.Model):
 
 class Sale(models.Model):
     CASH, CARD, ONLINE = 'cash', 'card', 'online'
-    PAYMENT_METHODS = [(CASH, 'Numerar'), (CARD, 'Card'), (ONLINE, 'Online')]
+    PAYMENT_METHODS = [(CASH, 'Cash'), (CARD, 'Card'), (ONLINE, 'Online')]
     menu_item = models.ForeignKey(MenuItem, on_delete=models.PROTECT, related_name='sales')
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sales')
     stock_item = models.ForeignKey(StockItem, on_delete=models.SET_NULL, null=True, blank=True)
@@ -78,16 +78,16 @@ class Sale(models.Model):
             self.stock_item = self.menu_item.stock_item
         super().save(*args, **kwargs)
         if creating and self.stock_item_id:
-            StockMovement.objects.create(item=self.stock_item, movement_type=StockMovement.SALE, quantity=self.quantity, note=f'Vânzare #{self.pk}')
+            StockMovement.objects.create(item=self.stock_item, movement_type=StockMovement.SALE, quantity=self.quantity, note=f'Sale #{self.pk}')
         if creating and self.customer_id:
             points = int(self.total)
             if points:
-                LoyaltyAccount.objects.get_or_create(user=self.customer)[0].add_points(points, f'Vânzare #{self.pk}')
+                LoyaltyAccount.objects.get_or_create(user=self.customer)[0].add_points(points, f'Sale #{self.pk}')
 
 
 class Expense(models.Model):
     SUPPLIER, SALARY, OTHER = 'supplier', 'salary', 'other'
-    CATEGORIES = [(SUPPLIER, 'Furnizor'), (SALARY, 'Salariu'), (OTHER, 'Diverse')]
+    CATEGORIES = [(SUPPLIER, 'Supplier'), (SALARY, 'Salary'), (OTHER, 'Other')]
     description = models.CharField(max_length=255)
     category = models.CharField(max_length=20, choices=CATEGORIES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -107,7 +107,7 @@ class Event(models.Model):
     description = models.TextField(blank=True)
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField(null=True, blank=True)
-    capacity = models.PositiveIntegerField(default=0, help_text='0 înseamnă nelimitat')
+    capacity = models.PositiveIntegerField(default=0, help_text='0 means unlimited')
     ticket_price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     requires_reservation = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
@@ -167,7 +167,7 @@ class LoyaltyAccount(models.Model):
         LoyaltyTransaction.objects.create(account=self, points=amount, note=note)
 
     def __str__(self):
-        return f'{self.user} – {self.points} puncte'
+        return f'{self.user} – {self.points} points'
 
 
 class LoyaltyTransaction(models.Model):
@@ -197,7 +197,7 @@ class LoyaltyRedemption(models.Model):
 
 class PromoCode(models.Model):
     PERCENT, FIXED, FREE_ITEM = 'percent', 'fixed', 'free_item'
-    TYPES = [(PERCENT, 'Reducere procentuală'), (FIXED, 'Reducere fixă'), (FREE_ITEM, 'Produs gratuit')]
+    TYPES = [(PERCENT, 'Percentage discount'), (FIXED, 'Fixed discount'), (FREE_ITEM, 'Free item')]
     code = models.CharField(max_length=40, unique=True)
     discount_type = models.CharField(max_length=12, choices=TYPES, default=PERCENT)
     value = models.DecimalField(max_digits=8, decimal_places=2, default=0)
@@ -230,7 +230,7 @@ class PromoCode(models.Model):
 
 class StaffProfile(models.Model):
     CEO, MANAGER, WAITER, KITCHEN = 'ceo', 'manager', 'waiter', 'kitchen'
-    ROLES = [(CEO, 'CEO'), (MANAGER, 'Manager'), (WAITER, 'Ospătar'), (KITCHEN, 'Bucătărie / Bar')]
+    ROLES = [(CEO, 'CEO'), (MANAGER, 'Manager'), (WAITER, 'Waiter'), (KITCHEN, 'Kitchen / Bar')]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
     role = models.CharField(max_length=20, choices=ROLES, default=WAITER)
     phone = models.CharField(max_length=30, blank=True)
@@ -256,7 +256,7 @@ class StaffShift(models.Model):
 
 class WaitlistEntry(models.Model):
     WAITING, NOTIFIED, CONVERTED, CANCELLED = 'waiting', 'notified', 'converted', 'cancelled'
-    STATUSES = [(WAITING, 'În așteptare'), (NOTIFIED, 'Notificat'), (CONVERTED, 'Rezervare creată'), (CANCELLED, 'Anulat')]
+    STATUSES = [(WAITING, 'Waiting'), (NOTIFIED, 'Notified'), (CONVERTED, 'Reservation created'), (CANCELLED, 'Cancelled')]
     name = models.CharField(max_length=150)
     email = models.EmailField()
     phone = models.CharField(max_length=30)

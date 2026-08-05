@@ -122,7 +122,7 @@ class ReservationForm(forms.ModelForm):
             return cleaned_data
 
         if guests < 1:
-            raise forms.ValidationError("Numărul de persoane trebuie să fie cel puțin 1.")
+            raise forms.ValidationError("The number of guests must be at least 1.")
 
         reservation_time_obj = datetime.strptime(
             reservation_time,
@@ -179,11 +179,11 @@ class ReservationForm(forms.ModelForm):
             try:
                 promo = PromoCode.objects.get(code__iexact=promo_value)
                 if not promo.is_valid():
-                    raise forms.ValidationError('Codul promoțional nu este activ sau nu mai este valabil.')
+                    raise forms.ValidationError('This promo code is not active or is no longer valid.')
                 cleaned_data['promo_code'] = promo.code
                 self.promo = promo
             except PromoCode.DoesNotExist:
-                raise forms.ValidationError('Cod promoțional invalid.')
+                raise forms.ValidationError('Invalid promo code.')
 
         return cleaned_data
 
@@ -214,11 +214,11 @@ class ReservationForm(forms.ModelForm):
                     if promo:
                         locked_promo = PromoCode.objects.select_for_update().get(pk=promo.pk)
                         if not locked_promo.is_valid():
-                            raise forms.ValidationError('Codul promoțional tocmai a expirat sau a atins limita de utilizări.')
+                            raise forms.ValidationError('This promo code just expired or reached its usage limit.')
                         locked_promo.register_use()
                     reservation.save()
             except IntegrityError:
-                raise forms.ValidationError('Ne pare rău, masa a fost rezervată de altcineva chiar acum. Încearcă alt interval orar.')
+                raise forms.ValidationError('Sorry, this table was just booked by someone else. Please try a different time slot.')
 
             self.save_m2m()
 

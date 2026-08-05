@@ -11,7 +11,7 @@ class TicketForm(forms.ModelForm):
     def clean_quantity(self):
         quantity = self.cleaned_data['quantity']
         if quantity < 1:
-            raise forms.ValidationError('Numărul de bilete trebuie să fie cel puțin 1.')
+            raise forms.ValidationError('The number of tickets must be at least 1.')
         return quantity
 
 
@@ -29,5 +29,5 @@ class WaitlistForm(forms.ModelForm):
     def clean_guests(self):
         guests = self.cleaned_data['guests']
         if guests < 1:
-            raise forms.ValidationError('Numărul de persoane trebuie să fie cel puțin 1.')
+            raise forms.ValidationError('The number of guests must be at least 1.')
         return guests

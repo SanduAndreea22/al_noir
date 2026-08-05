@@ -21,12 +21,12 @@ class MenuItem(models.Model):
     is_available = models.BooleanField(default=True)
     is_loyalty_reward = models.BooleanField(
         default=False,
-        help_text='Poate fi oferit ca desert gratuit prin programul de loialitate.'
+        help_text='Can be offered as a free dessert through the loyalty program.'
     )
     stock_item = models.ForeignKey(
         'operations.StockItem', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='menu_items',
-        help_text='Dacă e setat, stocul acestui produs scade automat la fiecare vânzare.'
+        help_text="If set, this item's stock decreases automatically with every sale."
     )
 
     def __str__(self):

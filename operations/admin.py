@@ -90,10 +90,10 @@ class StaffShiftAdmin(admin.ModelAdmin):
     list_filter = ('staff__role',)
 
 
-@admin.action(description='Trimite notificare de disponibilitate')
+@admin.action(description='Send availability notification')
 def notify_waitlist(modeladmin, request, queryset):
     for entry in queryset.filter(status=WaitlistEntry.WAITING):
-        send_mail('O masă s-ar putea să fie disponibilă', f'Bună, {entry.name}! Contactează Al Noir pentru rezervarea din {entry.reservation_date}.', settings.DEFAULT_FROM_EMAIL, [entry.email], fail_silently=True)
+        send_mail('A table might be available', f'Hi {entry.name}! Contact Al Noir about your reservation for {entry.reservation_date}.', settings.DEFAULT_FROM_EMAIL, [entry.email], fail_silently=True)
         entry.status = WaitlistEntry.NOTIFIED
         entry.save(update_fields=('status',))
 

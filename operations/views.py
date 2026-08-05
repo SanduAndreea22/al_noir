@@ -24,7 +24,7 @@ def waitlist(request):
     form = WaitlistForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         form.save()
-        messages.success(request, 'Ai fost adăugat(ă) pe lista de așteptare. Te contactăm dacă se eliberează o masă.')
+        messages.success(request, 'You have been added to the waitlist. We will contact you if a table becomes available.')
         return redirect('operations:waitlist')
     return render(request, 'operations/waitlist.html', {'form': form})
 
@@ -40,13 +40,13 @@ def event_booking(request, pk):
                 booked = Ticket.objects.filter(event=locked_event).aggregate(total=Sum('quantity'))['total'] or 0
                 remaining = locked_event.capacity - booked
                 if quantity > remaining:
-                    form.add_error('quantity', f'Mai sunt doar {max(remaining, 0)} locuri disponibile la acest eveniment.')
+                    form.add_error('quantity', f'Only {max(remaining, 0)} spots left for this event.')
                     return render(request, 'operations/event_booking.html', {'event': event, 'form': form})
             ticket = form.save(commit=False)
             ticket.event = event
             ticket.paid = event.is_free
             ticket.save()
-        messages.success(request, 'Rezervarea pentru eveniment a fost înregistrată.' if event.is_free else 'Biletul a fost rezervat. Configurează Stripe pentru plata online.')
+        messages.success(request, 'Your event registration has been recorded.' if event.is_free else 'Your ticket has been reserved. Configure Stripe to enable online payment.')
         return redirect('operations:events')
     return render(request, 'operations/event_booking.html', {'event': event, 'form': form})
 
@@ -69,19 +69,19 @@ def redeem_reward(request):
     from menu.models import MenuItem
     dessert = MenuItem.objects.filter(is_loyalty_reward=True, is_available=True).first()
     if account.points < 100 or not dessert:
-        messages.error(request, 'Nu există suficiente puncte sau niciun desert eligibil disponibil.')
+        messages.error(request, 'Not enough points, or no eligible dessert is available.')
         return redirect('operations:client_dashboard')
     with transaction.atomic():
         account = LoyaltyAccount.objects.select_for_update().get(pk=account.pk)
         if account.points < 100:
-            messages.error(request, 'Punctele au fost actualizate. Nu mai poți solicita recompensa.')
+            messages.error(request, 'Your points have changed. You can no longer claim this reward.')
             return redirect('operations:client_dashboard')
         account.points -= 100
         account.save(update_fields=('points', 'updated_at'))
-        LoyaltyTransaction.objects.create(account=account, points=-100, note='Recompensă: desert gratuit')
+        LoyaltyTransaction.objects.create(account=account, points=-100, note='Reward: free dessert')
         code = f'DESERT-{secrets.token_hex(4).upper()}'
         LoyaltyRedemption.objects.create(account=account, code=code, reward=dessert)
-    messages.success(request, f'Recompensa ta este gata: {code}. Arată acest cod personalului pentru {dessert.name}.')
+    messages.success(request, f'Your reward is ready: {code}. Show this code to staff for {dessert.name}.')
     return redirect('operations:client_dashboard')
 
 
@@ -154,9 +154,9 @@ def invoice_pdf(request, pk):
     # in Admin and the endpoint serves a downloadable/printable invoice.
     lines = [
         transliterate_ro(line) for line in [
-            'AL NOIR - FACTURA', f'Numar: {invoice.number}', f'Data: {invoice.issued_at:%d.%m.%Y}',
-            f'Client: {invoice.customer_name}', f'Descriere: {invoice.description}',
-            f'Total: {invoice.amount:.2f} RON', 'Status: ACHITATA' if invoice.paid else 'Status: NEACHITATA',
+            'AL NOIR - INVOICE', f'Number: {invoice.number}', f'Date: {invoice.issued_at:%d.%m.%Y}',
+            f'Client: {invoice.customer_name}', f'Description: {invoice.description}',
+            f'Total: {invoice.amount:.2f} RON', 'Status: PAID' if invoice.paid else 'Status: UNPAID',
         ]
     ]
     def esc(value): return value.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
@@ -169,5 +169,5 @@ def invoice_pdf(request, pk):
     for offset in offsets: pdf.extend(f'{offset:010d} 00000 n \n'.encode())
     pdf.extend(f'trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{start}\n%%EOF'.encode())
     response = HttpResponse(bytes(pdf), content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="factura-{invoice.number}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="invoice-{invoice.number}.pdf"'
     return response
