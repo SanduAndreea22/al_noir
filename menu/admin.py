@@ -9,5 +9,6 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'is_available', 'is_loyalty_reward')
+    list_display = ('name', 'category', 'price', 'stock_item', 'is_available', 'is_loyalty_reward')
     list_filter = ('category', 'is_available', 'is_loyalty_reward')
+    autocomplete_fields = ('stock_item',)

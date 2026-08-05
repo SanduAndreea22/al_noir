@@ -23,6 +23,11 @@ class MenuItem(models.Model):
         default=False,
         help_text='Poate fi oferit ca desert gratuit prin programul de loialitate.'
     )
+    stock_item = models.ForeignKey(
+        'operations.StockItem', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='menu_items',
+        help_text='Dacă e setat, stocul acestui produs scade automat la fiecare vânzare.'
+    )
 
     def __str__(self):
         return f"{self.name} - {self.category.name}"

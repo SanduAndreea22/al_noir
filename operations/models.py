@@ -74,6 +74,8 @@ class Sale(models.Model):
         creating = self.pk is None
         if creating and not self.unit_price:
             self.unit_price = self.menu_item.price
+        if creating and not self.stock_item_id and self.menu_item.stock_item_id:
+            self.stock_item = self.menu_item.stock_item
         super().save(*args, **kwargs)
         if creating and self.stock_item_id:
             StockMovement.objects.create(item=self.stock_item, movement_type=StockMovement.SALE, quantity=self.quantity, note=f'Vânzare #{self.pk}')
