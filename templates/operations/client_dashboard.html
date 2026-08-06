@@ -1,2 +1,54 @@
 {% extends 'base.html' %}
-{% block content %}<section class="container py-5"><h1>Client Dashboard</h1><section class="mb-5"><h2>Al Noir Loyalty</h2><p>You have <strong>{{ loyalty_account.points }} points</strong>. At 100 points you get a free dessert.</p>{% if loyalty_account.points >= 100 %}<form method="post" action="{% url 'operations:redeem_reward' %}">{% csrf_token %}<button class="btn btn-dark">Claim Free Dessert</button></form>{% endif %}<ul>{% for redemption in redemptions %}<li>{{ redemption.reward.name }} — code: <strong>{{ redemption.code }}</strong>{% if redemption.is_used %} (used){% endif %}</li>{% endfor %}</ul></section><h2>My Reservations</h2><table class="table"><thead><tr><th>Date</th><th>Table</th><th>Guests</th><th>Status</th><th>Deposit</th><th>Promo</th></tr></thead><tbody>{% for item in reservations %}<tr><td>{{ item.reservation_date }} {{ item.reservation_time }}</td><td>{{ item.table|default:'To be assigned' }}</td><td>{{ item.guests }}</td><td>{{ item.get_status_display }}</td><td>${{ item.advance_amount }} {% if item.advance_paid %}(paid){% endif %}</td><td>{{ item.promo_code|default:'—' }}</td></tr>{% empty %}<tr><td colspan="6">You don't have any reservations yet.</td></tr>{% endfor %}</tbody></table></section>{% endblock %}
+{% block content %}
+<section class="container py-5 dashboard-page">
+    <h1>Client Dashboard</h1>
+
+    <section class="mb-5">
+        <h2>Al Noir Loyalty</h2>
+        <p>You have <strong>{{ loyalty_account.points }} points</strong>. At 100 points you get a free dessert.</p>
+        {% if loyalty_account.points >= 100 %}
+        <form method="post" action="{% url 'operations:redeem_reward' %}" class="mt-3">
+            {% csrf_token %}
+            <button class="btn btn-dark">Claim Free Dessert</button>
+        </form>
+        {% endif %}
+        <ul class="mt-3">
+            {% for redemption in redemptions %}
+                <li>{{ redemption.reward.name }} — code: <strong>{{ redemption.code }}</strong>{% if redemption.is_used %} (used){% endif %}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <div class="dashboard-section">
+        <h2>My Reservations</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Table</th>
+                    <th>Guests</th>
+                    <th>Status</th>
+                    <th>Deposit</th>
+                    <th>Promo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in reservations %}
+                <tr>
+                    <td>{{ item.reservation_date }} {{ item.reservation_time }}</td>
+                    <td>{{ item.table|default:'To be assigned' }}</td>
+                    <td>{{ item.guests }}</td>
+                    <td>{{ item.get_status_display }}</td>
+                    <td>${{ item.advance_amount }} {% if item.advance_paid %}(paid){% endif %}</td>
+                    <td>{{ item.promo_code|default:'—' }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">You don't have any reservations yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

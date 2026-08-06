@@ -1,2 +1,74 @@
 {% extends 'base.html' %}
-{% block content %}<section class="container py-5"><h1>Staff Dashboard</h1><p>Pending reservations: {{ pending_reservations }}</p><div class="row"><div class="col"><h3>Menu Sales</h3><p>${{ sales_total }}</p></div><div class="col"><h3>Deposits</h3><p>${{ advance_total }}</p></div><div class="col"><h3>Tickets Paid</h3><p>${{ ticket_total }}</p></div><div class="col"><h3>Expenses</h3><p>${{ expenses_total }}</p></div><div class="col"><h3>Profit</h3><p>${{ profit }}</p></div></div><div class="row">{% for label, total in expense_by_category %}<div class="col"><h3>{{ label }}</h3><p>${{ total }}</p></div>{% endfor %}</div><h2>Stock Alerts</h2><p>{% for item in low_stock %}<span class="stock-low">{{ item.name }} ({{ item.quantity }} {{ item.unit }})</span>{% if not forloop.last %}, {% endif %}{% empty %}No products below threshold.{% endfor %}</p><h2>Expired Products</h2><p>{% for item in expired_stock %}<span class="stock-low">{{ item.name }}</span>{% if not forloop.last %}, {% endif %}{% empty %}No expired products.{% endfor %}</p><h2>Recent Invoices</h2><ul>{% for invoice in invoices %}<li>{{ invoice.number }} – ${{ invoice.amount }} <a href="{% url 'operations:invoice_pdf' invoice.pk %}">PDF</a></li>{% empty %}<li>No invoices yet.</li>{% endfor %}</ul><a class="btn btn-dark" href="/admin/">Full Admin</a></section>{% endblock %}
+{% block content %}
+<section class="container py-5 dashboard-page">
+    <h1>Staff Dashboard</h1>
+    <p class="small">Pending reservations: {{ pending_reservations }}</p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Menu Sales</h3>
+            <p>${{ sales_total }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Deposits</h3>
+            <p>${{ advance_total }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Tickets Paid</h3>
+            <p>${{ ticket_total }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Expenses</h3>
+            <p>${{ expenses_total }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Profit</h3>
+            <p>${{ profit }}</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        {% for label, total in expense_by_category %}
+        <div class="stat-card">
+            <h3>{{ label }}</h3>
+            <p>${{ total }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Stock Alerts</h2>
+        <p>
+            {% for item in low_stock %}
+                <span class="stock-low">{{ item.name }} ({{ item.quantity }} {{ item.unit }})</span>{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                No products below threshold.
+            {% endfor %}
+        </p>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Expired Products</h2>
+        <p>
+            {% for item in expired_stock %}
+                <span class="stock-low">{{ item.name }}</span>{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                No expired products.
+            {% endfor %}
+        </p>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Recent Invoices</h2>
+        <ul>
+            {% for invoice in invoices %}
+                <li>{{ invoice.number }} – ${{ invoice.amount }} <a href="{% url 'operations:invoice_pdf' invoice.pk %}">PDF</a></li>
+            {% empty %}
+                <li>No invoices yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <a class="btn btn-dark mt-4" href="/admin/">Full Admin</a>
+</section>
+{% endblock %}
