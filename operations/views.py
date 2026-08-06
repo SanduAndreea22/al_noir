@@ -17,7 +17,10 @@ from .models import Event, Expense, Invoice, LoyaltyAccount, LoyaltyRedemption, 
 
 
 def events(request):
-    return render(request, 'operations/events.html', {'events': Event.objects.filter(is_active=True, starts_at__gte=timezone.now())})
+    return render(request, 'operations/events.html', {
+        'upcoming_events': Event.objects.filter(is_active=True, starts_at__gte=timezone.now()).order_by('starts_at'),
+        'past_events': Event.objects.filter(is_active=True, starts_at__lt=timezone.now()).order_by('-starts_at'),
+    })
 
 
 def waitlist(request):
