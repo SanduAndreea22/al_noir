@@ -1,12 +1,14 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from django.db import IntegrityError, transaction
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from menu.models import Category, MenuItem
 from .forms import ReservationForm
-from .models import Table
+from .models import Reservation, Table
 
 
 class ReservationDepositTests(TestCase):
@@ -31,3 +33,31 @@ class ReservationDepositTests(TestCase):
         form = ReservationForm()
         self.assertIn(str(item.pk), str(form['selected_items']))
         self.assertIn('data-price="30.00"', str(form['selected_items']))
+
+
+class DoubleBookingTests(TestCase):
+    def test_same_table_slot_cannot_be_booked_twice_at_db_level(self):
+        table = Table.objects.create(number=2, capacity=4)
+        slot = timezone.localtime(timezone.now() + timedelta(days=1)).replace(hour=20, minute=0, second=0, microsecond=0)
+        Reservation.objects.create(
+            table=table, name='First', email='first@example.com', phone='0700000001',
+            reservation_date=slot.date(), reservation_time=slot.time(), guests=2, status='pending',
+        )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Reservation.objects.create(
+                    table=table, name='Second', email='second@example.com', phone='0700000002',
+                    reservation_date=slot.date(), reservation_time=slot.time(), guests=2, status='confirmed',
+                )
+
+
+class CheckoutAccessTests(TestCase):
+    def test_checkout_rejects_wrong_access_token(self):
+        table = Table.objects.create(number=3, capacity=2)
+        reservation = Reservation.objects.create(
+            table=table, name='Client', email='client@example.com', phone='0700000003',
+            reservation_date=timezone.localdate() + timedelta(days=1), reservation_time='19:00',
+            guests=2, advance_amount=Decimal('10.00'),
+        )
+        response = self.client.get(reverse('reservations:checkout', args=[reservation.pk, 'wrong-token']))
+        self.assertEqual(response.status_code, 404)

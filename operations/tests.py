@@ -1,11 +1,13 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from menu.models import Category, MenuItem
-from .models import Invoice, LoyaltyAccount, Sale, StockItem, StockMovement
+from .models import Event, Invoice, LoyaltyAccount, Sale, StaffProfile, StockItem, StockMovement, Ticket
 
 
 class OperationsTests(TestCase):
@@ -33,3 +35,47 @@ class OperationsTests(TestCase):
         customer = User.objects.create_user('client', password='test-password')
         Sale.objects.create(menu_item=self.menu_item, customer=customer, quantity=2, unit_price=Decimal('25.00'))
         self.assertEqual(LoyaltyAccount.objects.get(user=customer).points, 50)
+
+
+class EventBookingTests(TestCase):
+    def setUp(self):
+        self.future_event = Event.objects.create(
+            title='Jazz Night', starts_at=timezone.now() + timedelta(days=7),
+            capacity=1, ticket_price=Decimal('0'), is_active=True,
+        )
+
+    def test_cannot_book_tickets_for_an_event_that_already_happened(self):
+        past_event = Event.objects.create(
+            title='Old Gala', starts_at=timezone.now() - timedelta(days=1), is_active=True,
+        )
+        response = self.client.post(reverse('operations:event_booking', args=[past_event.pk]), {
+            'customer_name': 'Client Test', 'customer_email': 'client@example.com', 'quantity': 1,
+        })
+        self.assertRedirects(response, reverse('operations:events'))
+        self.assertEqual(Ticket.objects.count(), 0)
+
+    def test_cannot_book_more_tickets_than_remaining_capacity(self):
+        Ticket.objects.create(event=self.future_event, customer_name='Existing', customer_email='a@example.com', quantity=1, paid=True)
+        response = self.client.post(reverse('operations:event_booking', args=[self.future_event.pk]), {
+            'customer_name': 'Client Test', 'customer_email': 'client@example.com', 'quantity': 1,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Only 0 spots left')
+        self.assertEqual(Ticket.objects.count(), 1)
+
+
+class ManagerReportAccessTests(TestCase):
+    def _staff_user(self, username, role):
+        user = User.objects.create_user(username, password='test-password', is_staff=True)
+        StaffProfile.objects.create(user=user, role=role)
+        return user
+
+    def test_waiter_cannot_view_financial_reports(self):
+        self.client.force_login(self._staff_user('waiter', StaffProfile.WAITER))
+        response = self.client.get(reverse('operations:staff_dashboard'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_manager_can_view_financial_reports(self):
+        self.client.force_login(self._staff_user('manager', StaffProfile.MANAGER))
+        response = self.client.get(reverse('operations:staff_dashboard'))
+        self.assertEqual(response.status_code, 200)

@@ -1,9 +1,11 @@
 from datetime import date
 from decimal import Decimal
+from functools import wraps
 import secrets
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import DecimalField, ExpressionWrapper, F, Sum
 from django.http import HttpResponse
@@ -14,6 +16,19 @@ from core.utils import transliterate_ro
 from reservations.models import Reservation
 from .forms import TicketForm, WaitlistForm
 from .models import Event, Expense, Invoice, LoyaltyAccount, LoyaltyRedemption, LoyaltyTransaction, Sale, StaffProfile, StaffShift, StockItem, Ticket
+
+
+def manager_required(view_func):
+    """Restricts a view to CEO/Manager staff (or superusers) — financial data
+    shouldn't be visible to every is_staff account regardless of StaffProfile.role."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        profile = getattr(request.user, 'staff_profile', None)
+        allowed_roles = (StaffProfile.CEO, StaffProfile.MANAGER)
+        if not (request.user.is_superuser or (profile and profile.role in allowed_roles)):
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 def events(request):
@@ -34,6 +49,9 @@ def waitlist(request):
 
 def event_booking(request, pk):
     event = get_object_or_404(Event, pk=pk, is_active=True)
+    if (event.ends_at or event.starts_at) < timezone.now():
+        messages.error(request, 'This event has already taken place.')
+        return redirect('operations:events')
     form = TicketForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         quantity = form.cleaned_data['quantity']
@@ -89,6 +107,7 @@ def redeem_reward(request):
 
 
 @staff_member_required
+@manager_required
 def staff_dashboard(request):
     sales_total = Sale.objects.aggregate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
     advance_total = Reservation.objects.filter(advance_paid=True).aggregate(total=Sum('advance_amount'))['total'] or Decimal('0')
@@ -103,6 +122,7 @@ def staff_dashboard(request):
 
 
 @staff_member_required
+@manager_required
 def reports(request):
     today = timezone.localdate()
 

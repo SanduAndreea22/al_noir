@@ -1,9 +1,11 @@
 {% extends "admin/index.html" %}
 
 {% block content %}
+{% if user.is_superuser or user.staff_profile.role == 'ceo' or user.staff_profile.role == 'manager' %}
 <div class="module" style="margin-bottom: 20px; padding: 15px;">
     <a href="{% url 'operations:staff_dashboard' %}" class="button">📊 Staff Dashboard (sales, profit, stock)</a>
     <a href="{% url 'operations:reports' %}" class="button" style="margin-left: 10px;">📈 Financial Reports</a>
 </div>
+{% endif %}
 {{ block.super }}
 {% endblock %}
