@@ -1,14 +1,59 @@
 {% extends 'base.html' %}
 {% block title %}Events | {{ site_settings.restaurant_name }}{% endblock %}
-{% block content %}<section class="container py-5">
-<h1>Events</h1>
+{% block content %}
 
-<h2>Upcoming Events</h2>
-{% for event in upcoming_events %}<article class="mb-4"><h2>{{ event.title }}</h2><p>{{ event.starts_at|date:'d.m.Y H:i' }}</p><p>{{ event.description }}</p><p>{% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</p><a class="btn btn-dark" href="{% url 'operations:event_booking' event.pk %}">Book</a></article>{% empty %}<p>No upcoming events scheduled at the moment.</p>{% endfor %}
+<section class="page-hero">
+    <div class="container page-hero-content reveal">
+        <p class="section-eyebrow">WHAT'S ON</p>
+        <h1>Events at {{ site_settings.restaurant_name }}</h1>
+        <p>Live music, tasting menus, and celebrations shaped by the {{ site_settings.restaurant_name }} atmosphere.</p>
+    </div>
+</section>
+
+<section class="events-section">
+    <div class="container">
+        <div class="feature-intro reveal">
+            <p class="section-eyebrow">UPCOMING</p>
+            <h2>Upcoming Events</h2>
+        </div>
+
+        {% if upcoming_events %}
+            <div class="events-grid">
+                {% for event in upcoming_events %}
+                    <div class="event-card reveal">
+                        <span class="event-date">{{ event.starts_at|date:'d.m.Y H:i' }}</span>
+                        <h3>{{ event.title }}</h3>
+                        <p>{{ event.description }}</p>
+                        <span class="event-price">{% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</span>
+                        <a class="btn btn-gold" href="{% url 'operations:event_booking' event.pk %}">Book</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="events-empty">No upcoming events scheduled at the moment.</p>
+        {% endif %}
+    </div>
+</section>
 
 {% if past_events %}
-<h2>Past Events</h2>
-{% for event in past_events %}<article class="mb-4"><h2>{{ event.title }}</h2><p>{{ event.starts_at|date:'d.m.Y H:i' }}</p><p>{{ event.description }}</p></article>{% endfor %}
+<section class="events-section alt-bg">
+    <div class="container">
+        <div class="feature-intro reveal">
+            <p class="section-eyebrow">ARCHIVE</p>
+            <h2>Past Events</h2>
+        </div>
+
+        <div class="events-grid">
+            {% for event in past_events %}
+                <div class="event-card event-card-past reveal">
+                    <span class="event-date">{{ event.starts_at|date:'d.m.Y H:i' }}</span>
+                    <h3>{{ event.title }}</h3>
+                    <p>{{ event.description }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endif %}
 
-</section>{% endblock %}
+{% endblock %}

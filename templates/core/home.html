@@ -32,7 +32,7 @@
 <!-- MENU + RESERVATIONS SECTION -->
 <section class="home-feature-section">
     <div class="container">
-        <div class="feature-intro">
+        <div class="feature-intro reveal">
             <p class="section-eyebrow">OUR EXPERIENCE</p>
             <h2>Elegance, Flavor, and Atmosphere</h2>
             <p>
@@ -42,7 +42,7 @@
         </div>
 
         <div class="feature-grid">
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon">🍽</div>
                 <h3>Our Menu</h3>
                 <p>
@@ -52,7 +52,7 @@
                 <a href="/menu/" class="btn btn-gold">View Menu</a>
             </div>
 
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon">📍</div>
                 <h3>Reservations</h3>
                 <p>
@@ -68,7 +68,7 @@
 <!-- OUR STORY SECTION -->
 <section class="story-section">
     <div class="container story-container">
-        <div class="story-image">
+        <div class="story-image reveal">
             {% if site_settings.hero_image %}
                 <img src="{{ site_settings.hero_image.url }}" alt="Our Story">
             {% else %}
@@ -76,7 +76,7 @@
             {% endif %}
         </div>
 
-        <div class="story-content">
+        <div class="story-content reveal">
             <p class="section-eyebrow">OUR STORY</p>
             <h2>The Story Behind {{ site_settings.restaurant_name }}</h2>
             <p>
@@ -92,14 +92,14 @@
 <!-- REVIEWS PREVIEW -->
 <section class="reviews-section">
     <div class="container">
-        <div class="feature-intro">
+        <div class="feature-intro reveal">
             <p class="section-eyebrow">GUEST REVIEWS</p>
             <h2>What Our Guests Say</h2>
         </div>
 
         <div class="reviews-grid">
             {% for review in approved_reviews %}
-                <div class="review-card">
+                <div class="review-card reveal">
                     <div class="review-stars">
                         {% for i in "12345" %}
                             {% if forloop.counter <= review.rating %}
@@ -113,7 +113,7 @@
                     <h4>{{ review.name }}</h4>
                 </div>
             {% empty %}
-                <div class="review-card">
+                <div class="review-card reveal">
                     <div class="review-stars">
                         <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                     </div>
@@ -133,7 +133,7 @@
 
 <!-- FINAL CTA -->
 <section class="cta-section">
-    <div class="container cta-content">
+    <div class="container cta-content reveal">
         <p class="section-eyebrow">RESERVE YOUR EXPERIENCE</p>
         <h2>Make Your Evening Memorable</h2>
         <p>

@@ -15,7 +15,19 @@
                 <label for="{{ field.id_for_label }}" class="form-label">
                     {{ field.label }}
                 </label>
-                {{ field }}
+
+                {% if field.name == 'selected_items' %}
+                    <div class="menu-checkbox-list">
+                        {% for checkbox in field %}
+                            <label class="menu-checkbox">
+                                {{ checkbox.tag }}
+                                <span>{{ checkbox.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ field }}
+                {% endif %}
 
                 {% if field.errors %}
                     <div class="text-danger small">
