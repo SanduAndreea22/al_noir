@@ -1,2 +1,41 @@
 {% extends 'base.html' %}
-{% block content %}<section class="container py-5"><h1>Create Account</h1><form method="post">{% csrf_token %}{% for field in form %}<div class="mb-3"><label>{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}</div>{% endfor %}<button class="btn btn-dark">Register</button></form></section>{% endblock %}
+{% block title %}Create Account | {{ site_settings.restaurant_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <p class="section-eyebrow">MY ACCOUNT</p>
+        <h1>Create Your Account</h1>
+        <p>Sign up to track your reservations and earn loyalty rewards.</p>
+    </div>
+</section>
+
+<section class="container py-5">
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="small">{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                    <div class="text-danger small">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-gold">
+            Register
+        </button>
+    </form>
+</section>
+
+{% endblock %}

@@ -74,6 +74,15 @@ html[data-theme="light"] {
     display: none;
 }
 
+.al-noir-admin-links {
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.al-noir-admin-links .button + .button {
+    margin-left: 10px;
+}
+
 #branding h1,
 #branding h1 a:link,
 #branding h1 a:visited {

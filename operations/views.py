@@ -18,6 +18,16 @@ from .forms import TicketForm, WaitlistForm
 from .models import Event, Expense, Invoice, LoyaltyAccount, LoyaltyRedemption, LoyaltyTransaction, Sale, StaffProfile, StaffShift, StockItem, Ticket
 
 
+def _line_total(price_field, quantity_field='quantity'):
+    return ExpressionWrapper(F(price_field) * F(quantity_field), output_field=DecimalField(max_digits=12, decimal_places=2))
+
+
+def _expenses_by_category(queryset):
+    """Single-query breakdown of an Expense queryset by category, in Expense.CATEGORIES order."""
+    totals = {row['category']: row['total'] for row in queryset.values('category').annotate(total=Sum('amount'))}
+    return [(label, totals.get(code) or Decimal('0')) for code, label in Expense.CATEGORIES]
+
+
 def manager_required(view_func):
     """Restricts a view to CEO/Manager staff (or superusers) — financial data
     shouldn't be visible to every is_staff account regardless of StaffProfile.role."""
@@ -67,7 +77,7 @@ def event_booking(request, pk):
             ticket.event = event
             ticket.paid = event.is_free
             ticket.save()
-        messages.success(request, 'Your event registration has been recorded.' if event.is_free else 'Your ticket has been reserved. Configure Stripe to enable online payment.')
+        messages.success(request, 'Your event registration has been recorded.' if event.is_free else 'Your ticket has been reserved. Our team will contact you to arrange payment.')
         return redirect('operations:events')
     return render(request, 'operations/event_booking.html', {'event': event, 'form': form})
 
@@ -76,7 +86,7 @@ def event_booking(request, pk):
 def client_dashboard(request):
     account, _ = LoyaltyAccount.objects.get_or_create(user=request.user)
     return render(request, 'operations/client_dashboard.html', {
-        'reservations': Reservation.objects.filter(user=request.user).order_by('-reservation_date'),
+        'reservations': Reservation.objects.filter(user=request.user).select_related('table').order_by('-reservation_date'),
         'loyalty_account': account,
         'redemptions': account.redemptions.select_related('reward').all()[:5],
     })
@@ -89,8 +99,11 @@ def redeem_reward(request):
     account, _ = LoyaltyAccount.objects.get_or_create(user=request.user)
     from menu.models import MenuItem
     dessert = MenuItem.objects.filter(is_loyalty_reward=True, is_available=True).first()
-    if account.points < 100 or not dessert:
-        messages.error(request, 'Not enough points, or no eligible dessert is available.')
+    if account.points < 100:
+        messages.error(request, 'You need at least 100 points to claim this reward.')
+        return redirect('operations:client_dashboard')
+    if not dessert:
+        messages.error(request, 'No eligible dessert is available for this reward right now.')
         return redirect('operations:client_dashboard')
     with transaction.atomic():
         account = LoyaltyAccount.objects.select_for_update().get(pk=account.pk)
@@ -102,22 +115,19 @@ def redeem_reward(request):
         LoyaltyTransaction.objects.create(account=account, points=-100, note='Reward: free dessert')
         code = f'DESERT-{secrets.token_hex(4).upper()}'
         LoyaltyRedemption.objects.create(account=account, code=code, reward=dessert)
-    messages.success(request, f'Your reward is ready: {code}. Show this code to staff for {dessert.name}.')
+    messages.success(request, f'Your reward is ready: {code}. Show this code to staff to redeem your {dessert.name}.')
     return redirect('operations:client_dashboard')
 
 
 @staff_member_required
 @manager_required
 def staff_dashboard(request):
-    sales_total = Sale.objects.aggregate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
+    sales_total = Sale.objects.aggregate(total=Sum(_line_total('unit_price')))['total'] or Decimal('0')
     advance_total = Reservation.objects.filter(advance_paid=True).aggregate(total=Sum('advance_amount'))['total'] or Decimal('0')
-    ticket_total = Ticket.objects.filter(paid=True).aggregate(total=Sum(ExpressionWrapper(F('event__ticket_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
+    ticket_total = Ticket.objects.filter(paid=True).aggregate(total=Sum(_line_total('event__ticket_price')))['total'] or Decimal('0')
     paid_expenses = Expense.objects.filter(paid=True)
     expenses_total = paid_expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0')
-    expense_by_category = [
-        (label, paid_expenses.filter(category=code).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
-        for code, label in Expense.CATEGORIES
-    ]
+    expense_by_category = _expenses_by_category(paid_expenses)
     return render(request, 'operations/staff_dashboard.html', {'sales_total': sales_total, 'advance_total': advance_total, 'ticket_total': ticket_total, 'expenses_total': expenses_total, 'expense_by_category': expense_by_category, 'profit': sales_total + advance_total + ticket_total - expenses_total, 'low_stock': StockItem.objects.filter(quantity__lt=F('minimum_quantity')), 'expired_stock': StockItem.objects.filter(expiry_date__lt=timezone.localdate()), 'pending_reservations': Reservation.objects.filter(status='pending').count(), 'invoices': Invoice.objects.all()[:5]})
 
 
@@ -141,19 +151,16 @@ def reports(request):
     advances = Reservation.objects.filter(advance_paid=True, created_at__date__range=(start, end))
     expenses = Expense.objects.filter(expense_date__range=(start, end), paid=True)
 
-    sales_revenue = sales.aggregate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
-    ticket_revenue = tickets.aggregate(total=Sum(ExpressionWrapper(F('event__ticket_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2))))['total'] or Decimal('0')
+    sales_revenue = sales.aggregate(total=Sum(_line_total('unit_price')))['total'] or Decimal('0')
+    ticket_revenue = tickets.aggregate(total=Sum(_line_total('event__ticket_price')))['total'] or Decimal('0')
     advance_revenue = advances.aggregate(total=Sum('advance_amount'))['total'] or Decimal('0')
     revenue = sales_revenue + ticket_revenue + advance_revenue
 
-    expense_by_category = [
-        (label, expenses.filter(category=code).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
-        for code, label in Expense.CATEGORIES
-    ]
+    expense_by_category = _expenses_by_category(expenses)
     expense_total = sum((total for _, total in expense_by_category), Decimal('0'))
 
-    daily_sales = sales.annotate(day=TruncDate('created_at')).values('day').annotate(total=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2)))).order_by('day')
-    top_items = sales.values('menu_item__name').annotate(total_quantity=Sum('quantity'), revenue=Sum(ExpressionWrapper(F('unit_price') * F('quantity'), output_field=DecimalField(max_digits=12, decimal_places=2)))).order_by('-total_quantity')[:10]
+    daily_sales = sales.annotate(day=TruncDate('created_at')).values('day').annotate(total=Sum(_line_total('unit_price'))).order_by('day')
+    top_items = sales.values('menu_item_id', 'menu_item__name').annotate(total_quantity=Sum('quantity'), revenue=Sum(_line_total('unit_price'))).order_by('-total_quantity')[:10]
 
     return render(request, 'operations/reports.html', {
         'start': start, 'end': end,
@@ -171,6 +178,7 @@ def staff_schedule(request):
 
 
 @staff_member_required
+@manager_required
 def invoice_pdf(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     # Minimal, dependency-free PDF document. Billing details are entered by staff

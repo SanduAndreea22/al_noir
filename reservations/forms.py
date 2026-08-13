@@ -56,6 +56,10 @@ class ReservationForm(forms.ModelForm):
             "promo_code",
         ]
 
+        labels = {
+            "special_request": "Special requests",
+        }
+
         widgets = {
 
             "name": forms.TextInput(attrs={
@@ -94,7 +98,7 @@ class ReservationForm(forms.ModelForm):
             }),
 
             "promo_code": forms.TextInput(attrs={
-                "class": "form-control", "placeholder": "ex. WELCOME10"
+                "class": "form-control", "placeholder": "e.g. WELCOME10"
             }),
         }
 
@@ -179,11 +183,11 @@ class ReservationForm(forms.ModelForm):
             try:
                 promo = PromoCode.objects.get(code__iexact=promo_value)
                 if not promo.is_valid():
-                    raise forms.ValidationError('This promo code is not active or is no longer valid.')
+                    raise forms.ValidationError('This promo code is no longer valid.')
                 cleaned_data['promo_code'] = promo.code
                 self.promo = promo
             except PromoCode.DoesNotExist:
-                raise forms.ValidationError('Invalid promo code.')
+                raise forms.ValidationError("This promo code doesn't exist.")
 
         return cleaned_data
 

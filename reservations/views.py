@@ -1,3 +1,5 @@
+import logging
+
 from django import forms as django_forms
 from django.contrib import messages
 from django.conf import settings
@@ -8,6 +10,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from menu.models import Category
 from .forms import ReservationForm
+
+logger = logging.getLogger(__name__)
 
 
 def reservations(request):
@@ -90,7 +94,7 @@ def payment_success(request, pk):
     from .models import Reservation
     reservation = get_object_or_404(Reservation, pk=pk)
     session_id = request.GET.get('session_id')
-    if settings.STRIPE_SECRET_KEY and session_id and session_id == reservation.stripe_checkout_session_id:
+    if settings.STRIPE_SECRET_KEY and session_id and session_id == reservation.stripe_checkout_session_id and not reservation.advance_paid:
         try:
             import stripe
             stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -100,7 +104,10 @@ def payment_success(request, pk):
         except Exception:
             messages.warning(request, 'Your payment is being verified. We will contact you to confirm.')
             return redirect('operations:client_dashboard' if request.user.is_authenticated else 'reservations:reservations')
-    messages.success(request, 'Thank you! Your deposit payment has been confirmed.')
+    if reservation.advance_paid:
+        messages.success(request, 'Thank you! Your deposit payment has been confirmed.')
+    else:
+        messages.warning(request, 'Your payment is being verified. We will contact you to confirm.')
     return redirect('operations:client_dashboard' if request.user.is_authenticated else 'reservations:reservations')
 
 
@@ -112,10 +119,15 @@ def stripe_webhook(request):
         return HttpResponseBadRequest('Webhook unavailable.')
     try:
         import stripe
+    except ImportError:
+        logger.error('Stripe webhook received but the stripe package is not installed.')
+        return HttpResponseBadRequest('Stripe not installed.')
+    try:
         event = stripe.Webhook.construct_event(
             request.body, request.META.get('HTTP_STRIPE_SIGNATURE', ''), settings.STRIPE_WEBHOOK_SECRET
         )
-    except (ImportError, ValueError, Exception):
+    except (ValueError, stripe.error.SignatureVerificationError):
+        logger.warning('Stripe webhook rejected: invalid payload or signature.')
         return HttpResponseBadRequest('Invalid signature.')
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']

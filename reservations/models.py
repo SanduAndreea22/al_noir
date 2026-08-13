@@ -1,5 +1,6 @@
 import secrets
 
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -67,7 +68,7 @@ class Reservation(models.Model):
 
     reservation_time = models.TimeField()
 
-    guests = models.PositiveSmallIntegerField()
+    guests = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
     selected_items = models.ManyToManyField(
         "menu.MenuItem",

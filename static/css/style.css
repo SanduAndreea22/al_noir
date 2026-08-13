@@ -13,12 +13,15 @@
     --color-muted: #cfcfcf;
     --color-soft: #8f8f8f;
     --color-danger: #ffb3b3;
+    --color-danger-rgb: 255, 179, 179;
     --shadow-card: 0 18px 38px rgba(0, 0, 0, 0.28);
     --shadow-deep: 0 20px 60px rgba(0, 0, 0, 0.5);
     --container: 1200px;
     --radius-sm: 4px;
     --radius-md: 8px;
     --transition: 0.3s ease;
+    --font-heading: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Poppins', Arial, sans-serif;
 }
 
 /* =========================
@@ -35,10 +38,17 @@ html {
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: var(--font-body);
     background-color: var(--color-bg);
     color: var(--color-text);
     line-height: 1.7;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: var(--font-heading);
 }
 
 a {
@@ -135,15 +145,13 @@ button {
     color: #000;
 }
 
-.btn-gold,
-.btn-dark {
+.btn-gold {
     border-color: var(--color-gold);
     background-color: var(--color-gold);
     color: #111;
 }
 
-.btn-gold:hover,
-.btn-dark:hover {
+.btn-gold:hover {
     transform: translateY(-2px);
     background-color: #c39c27;
     box-shadow: 0 10px 24px rgba(212, 175, 55, 0.18);
@@ -185,6 +193,7 @@ input[type="email"],
 input[type="number"],
 input[type="date"],
 input[type="time"],
+input[type="password"],
 select,
 textarea {
     width: 100%;
@@ -228,8 +237,8 @@ textarea {
 }
 
 .form-control.input-error {
-    border-color: #d96b6b;
-    box-shadow: 0 0 0 3px rgba(217, 107, 107, 0.08);
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px rgba(var(--color-danger-rgb), 0.08);
 }
 
 .stock-low {
@@ -258,9 +267,9 @@ textarea {
 .contact-message-box.error,
 .error-message,
 .alert-danger {
-    border-color: rgba(217, 107, 107, 0.32);
-    background-color: rgba(217, 107, 107, 0.12);
-    color: #ffd1d1;
+    border-color: rgba(var(--color-danger-rgb), 0.32);
+    background-color: rgba(var(--color-danger-rgb), 0.12);
+    color: var(--color-danger);
 }
 
 .alert-warning {
@@ -307,6 +316,7 @@ textarea {
 
 .logo span {
     color: var(--color-gold);
+    font-family: var(--font-heading);
     font-size: 28px;
     font-weight: 700;
     letter-spacing: 2px;
@@ -788,7 +798,7 @@ textarea {
     margin-bottom: 32px;
     color: var(--color-gold-light);
     font-size: clamp(54px, 10vw, 120px);
-    font-weight: 200;
+    font-weight: 300;
     letter-spacing: 12px;
     animation: titlePulse 3s ease-in-out infinite;
 }
@@ -1080,7 +1090,7 @@ textarea {
     padding: 35px;
     border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: var(--radius-md);
-    background: #151515;
+    background: var(--color-surface);
 }
 
 .reservation-card h2 {
@@ -1119,7 +1129,7 @@ textarea {
 .category-title {
     margin-bottom: 18px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid var(--color-border);
     color: var(--color-gold);
     font-size: 26px;
 }
@@ -1231,7 +1241,7 @@ textarea {
     padding: 32px;
     border: 1px solid rgba(212, 175, 55, 0.18);
     border-radius: var(--radius-md);
-    background: #1a1a1a;
+    background: var(--color-surface);
 }
 
 /* =========================
@@ -1243,6 +1253,18 @@ textarea {
 
 .dashboard-page h1 {
     text-align: left;
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.filter-form .form-group {
+    margin-bottom: 0;
 }
 
 .dashboard-section {
