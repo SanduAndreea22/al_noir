@@ -77,7 +77,7 @@ def event_booking(request, pk):
             ticket.event = event
             ticket.paid = event.is_free
             ticket.save()
-        messages.success(request, 'Your event registration has been recorded.' if event.is_free else 'Your ticket has been reserved. Configure Stripe to enable online payment.')
+        messages.success(request, 'Your event registration has been recorded.' if event.is_free else 'Your ticket has been reserved. Our team will contact you to arrange payment.')
         return redirect('operations:events')
     return render(request, 'operations/event_booking.html', {'event': event, 'form': form})
 
@@ -99,8 +99,11 @@ def redeem_reward(request):
     account, _ = LoyaltyAccount.objects.get_or_create(user=request.user)
     from menu.models import MenuItem
     dessert = MenuItem.objects.filter(is_loyalty_reward=True, is_available=True).first()
-    if account.points < 100 or not dessert:
-        messages.error(request, 'Not enough points, or no eligible dessert is available.')
+    if account.points < 100:
+        messages.error(request, 'You need at least 100 points to claim this reward.')
+        return redirect('operations:client_dashboard')
+    if not dessert:
+        messages.error(request, 'No eligible dessert is available for this reward right now.')
         return redirect('operations:client_dashboard')
     with transaction.atomic():
         account = LoyaltyAccount.objects.select_for_update().get(pk=account.pk)
@@ -112,7 +115,7 @@ def redeem_reward(request):
         LoyaltyTransaction.objects.create(account=account, points=-100, note='Reward: free dessert')
         code = f'DESERT-{secrets.token_hex(4).upper()}'
         LoyaltyRedemption.objects.create(account=account, code=code, reward=dessert)
-    messages.success(request, f'Your reward is ready: {code}. Show this code to staff for {dessert.name}.')
+    messages.success(request, f'Your reward is ready: {code}. Show this code to staff to redeem your {dessert.name}.')
     return redirect('operations:client_dashboard')
 
 

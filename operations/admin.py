@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.core.mail import send_mail
 from django.conf import settings
+from core.models import SiteSettings
 from .models import Event, Expense, Invoice, LoyaltyAccount, LoyaltyRedemption, LoyaltyTransaction, PromoCode, Sale, StaffProfile, StaffShift, StockItem, StockMovement, Ticket, WaitlistEntry
 
 
@@ -92,8 +93,15 @@ class StaffShiftAdmin(admin.ModelAdmin):
 
 @admin.action(description='Send availability notification')
 def notify_waitlist(modeladmin, request, queryset):
+    site_settings = SiteSettings.objects.first()
+    restaurant_name = site_settings.restaurant_name if site_settings else 'us'
     for entry in queryset.filter(status=WaitlistEntry.WAITING):
-        send_mail('A table might be available', f'Hi {entry.name}! Contact Al Noir about your reservation for {entry.reservation_date}.', settings.DEFAULT_FROM_EMAIL, [entry.email], fail_silently=True)
+        send_mail(
+            'A table might be available',
+            f'Hi {entry.name}! A table may now be available for the waitlist request you made for '
+            f'{entry.reservation_date}. Please contact {restaurant_name} to confirm.',
+            settings.DEFAULT_FROM_EMAIL, [entry.email], fail_silently=True,
+        )
         entry.status = WaitlistEntry.NOTIFIED
         entry.save(update_fields=('status',))
 

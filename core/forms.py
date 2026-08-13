@@ -9,15 +9,15 @@ class ContactMessageForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Your name'
+                'placeholder': 'Full Name'
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Your email'
+                'placeholder': 'Email Address'
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Your phone'
+                'placeholder': 'Phone Number (optional)'
             }),
             'subject': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -38,8 +38,8 @@ class ReviewForm(forms.ModelForm):
         model = Review
         fields = ['name', 'email', 'review_text', 'rating']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your name'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Your email (optional)'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address (optional)'}),
             'review_text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your experience...', 'rows': 5}),
             'rating': forms.Select(attrs={'class': 'form-control'}),
         }

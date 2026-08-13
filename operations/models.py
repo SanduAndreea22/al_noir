@@ -35,7 +35,7 @@ class StockItem(models.Model):
 
 class StockMovement(models.Model):
     PURCHASE, SALE, WASTE, ADJUSTMENT = 'purchase', 'sale', 'waste', 'adjustment'
-    TYPES = [(PURCHASE, 'Purchase'), (SALE, 'Sale'), (WASTE, 'Waste/Expired'), (ADJUSTMENT, 'Adjustment')]
+    TYPES = [(PURCHASE, 'Purchase'), (SALE, 'Sale'), (WASTE, 'Waste / Expired'), (ADJUSTMENT, 'Adjustment')]
     item = models.ForeignKey(StockItem, on_delete=models.PROTECT, related_name='movements')
     movement_type = models.CharField(max_length=20, choices=TYPES)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
@@ -264,7 +264,7 @@ class StaffShift(models.Model):
 
 class WaitlistEntry(models.Model):
     WAITING, NOTIFIED, CONVERTED, CANCELLED = 'waiting', 'notified', 'converted', 'cancelled'
-    STATUSES = [(WAITING, 'Waiting'), (NOTIFIED, 'Notified'), (CONVERTED, 'Reservation created'), (CANCELLED, 'Cancelled')]
+    STATUSES = [(WAITING, 'Waiting'), (NOTIFIED, 'Notified'), (CONVERTED, 'Converted'), (CANCELLED, 'Cancelled')]
     name = models.CharField(max_length=150)
     email = models.EmailField()
     phone = models.CharField(max_length=30)
