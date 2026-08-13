@@ -7,6 +7,20 @@ A full-stack Django application for a fine-dining restaurant: public site, table
 
 Demo content (menu, reviews, contact details) is fictional, seeded for demonstration purposes.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Home page](docs/screenshots/home.png) | ![Menu page](docs/screenshots/menu.png) |
+| ![Reservation form](docs/screenshots/reservations.png) | ![Events page](docs/screenshots/events.png) |
+
+<details>
+<summary>More screenshots</summary>
+
+![About page](docs/screenshots/about.png)
+
+</details>
+
 ---
 
 ## What this project demonstrates
