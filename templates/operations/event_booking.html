@@ -1,2 +1,38 @@
 {% extends 'base.html' %}
-{% block content %}<section class="container py-5"><h1>{{ event.title }}</h1><p>{{ event.starts_at|date:'d.m.Y H:i' }} · {% if event.is_free %}free{% else %}${{ event.ticket_price }}/ticket{% endif %}</p><form method="post">{% csrf_token %}{% for field in form %}<div class="mb-3"><label>{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}<button class="btn btn-dark">Book Ticket</button></form></section>{% endblock %}
+{% block title %}{{ event.title }} | {{ site_settings.restaurant_name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <p class="section-eyebrow">EVENT BOOKING</p>
+        <h1>{{ event.title }}</h1>
+        <p>{{ event.starts_at|date:'d.m.Y H:i' }} · {% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</p>
+    </div>
+</section>
+
+<section class="container py-5">
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="text-danger small">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-gold">
+            Book Ticket
+        </button>
+    </form>
+</section>
+
+{% endblock %}

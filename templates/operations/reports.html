@@ -3,10 +3,16 @@
 <section class="container py-5 dashboard-page">
     <h1>Reports</h1>
 
-    <form method="get">
-        <label>From <input type="date" name="start" value="{{ start }}"></label>
-        <label>To <input type="date" name="end" value="{{ end }}"></label>
-        <button class="btn btn-dark">Update</button>
+    <form method="get" class="filter-form">
+        <div class="form-group">
+            <label class="form-label" for="report-start">From</label>
+            <input type="date" id="report-start" name="start" value="{{ start }}">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="report-end">To</label>
+            <input type="date" id="report-end" name="end" value="{{ end }}">
+        </div>
+        <button class="btn btn-gold">Update</button>
     </form>
 
     <div class="stats-grid">
