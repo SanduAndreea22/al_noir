@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.utils import timezone
 from menu.models import MenuItem
@@ -45,12 +46,16 @@ class StockMovement(models.Model):
         ordering = ('-created_at',)
 
     def save(self, *args, **kwargs):
+        # select_for_update() + a single atomic block make the increment/decrement race-safe
+        # under concurrent sales; raising on a negative result stops stock from going below zero.
         if self.pk:
             raise ValueError('Stock movements cannot be edited; create a new adjustment instead.')
         delta = self.quantity if self.movement_type in (self.PURCHASE, self.ADJUSTMENT) else -self.quantity
         with transaction.atomic():
             item = StockItem.objects.select_for_update().get(pk=self.item_id)
             item.quantity += delta
+            if item.quantity < 0:
+                raise ValueError(f'Not enough stock for "{item.name}" ({item.quantity} {item.unit} would remain).')
             item.save(update_fields=['quantity', 'updated_at'])
             super().save(*args, **kwargs)
 
@@ -71,18 +76,21 @@ class Sale(models.Model):
         return self.unit_price * self.quantity
 
     def save(self, *args, **kwargs):
+        # Sale row, stock decrement and loyalty points must all land or none should —
+        # one atomic block keeps a failed stock/loyalty step from leaving an orphaned Sale.
         creating = self.pk is None
         if creating and not self.unit_price:
             self.unit_price = self.menu_item.price
         if creating and not self.stock_item_id and self.menu_item.stock_item_id:
             self.stock_item = self.menu_item.stock_item
-        super().save(*args, **kwargs)
-        if creating and self.stock_item_id:
-            StockMovement.objects.create(item=self.stock_item, movement_type=StockMovement.SALE, quantity=self.quantity, note=f'Sale #{self.pk}')
-        if creating and self.customer_id:
-            points = int(self.total)
-            if points:
-                LoyaltyAccount.objects.get_or_create(user=self.customer)[0].add_points(points, f'Sale #{self.pk}')
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            if creating and self.stock_item_id:
+                StockMovement.objects.create(item=self.stock_item, movement_type=StockMovement.SALE, quantity=self.quantity, note=f'Sale #{self.pk}')
+            if creating and self.customer_id:
+                points = int(self.total)
+                if points:
+                    LoyaltyAccount.objects.get_or_create(user=self.customer)[0].add_points(points, f'Sale #{self.pk}')
 
 
 class Expense(models.Model):
@@ -127,7 +135,7 @@ class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='tickets')
     customer_name = models.CharField(max_length=150)
     customer_email = models.EmailField()
-    quantity = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     paid = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -262,7 +270,7 @@ class WaitlistEntry(models.Model):
     phone = models.CharField(max_length=30)
     reservation_date = models.DateField()
     reservation_time = models.TimeField()
-    guests = models.PositiveSmallIntegerField()
+    guests = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
     notes = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUSES, default=WAITING)
     created_at = models.DateTimeField(auto_now_add=True)

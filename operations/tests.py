@@ -22,14 +22,30 @@ class OperationsTests(TestCase):
         self.assertEqual(self.stock.quantity, Decimal('18.00'))
         self.assertEqual(StockMovement.objects.count(), 1)
 
-    def test_staff_can_download_invoice_pdf(self):
-        staff = User.objects.create_user('staff', password='test-password', is_staff=True)
+    def test_sale_cannot_reduce_stock_below_zero(self):
+        with self.assertRaises(ValueError):
+            Sale.objects.create(menu_item=self.menu_item, stock_item=self.stock, quantity=999, unit_price=Decimal('25.00'))
+        self.stock.refresh_from_db()
+        self.assertEqual(self.stock.quantity, Decimal('20.00'))
+        self.assertEqual(Sale.objects.count(), 0)
+
+    def test_manager_can_download_invoice_pdf(self):
+        manager = User.objects.create_user('manager', password='test-password', is_staff=True)
+        StaffProfile.objects.create(user=manager, role=StaffProfile.MANAGER)
         invoice = Invoice.objects.create(number='TEST-001', customer_name='Client Test', description='Servicii', amount=Decimal('100.00'))
-        self.client.force_login(staff)
+        self.client.force_login(manager)
         response = self.client.get(reverse('operations:invoice_pdf', args=[invoice.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertTrue(response.content.startswith(b'%PDF'))
+
+    def test_non_manager_staff_cannot_download_invoice_pdf(self):
+        waiter = User.objects.create_user('waiter', password='test-password', is_staff=True)
+        StaffProfile.objects.create(user=waiter, role=StaffProfile.WAITER)
+        invoice = Invoice.objects.create(number='TEST-002', customer_name='Client Test', description='Servicii', amount=Decimal('100.00'))
+        self.client.force_login(waiter)
+        response = self.client.get(reverse('operations:invoice_pdf', args=[invoice.pk]))
+        self.assertEqual(response.status_code, 403)
 
     def test_customer_sale_awards_loyalty_points(self):
         customer = User.objects.create_user('client', password='test-password')
