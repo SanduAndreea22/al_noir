@@ -1346,6 +1346,24 @@ textarea {
     background-color: rgba(212, 175, 55, 0.04);
 }
 
+.cancel-reservation-form {
+    display: inline;
+}
+
+.btn-cancel-link {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-danger);
+    font-size: 13px;
+    text-decoration: underline;
+    transition: color var(--transition);
+}
+
+.btn-cancel-link:hover {
+    color: #ff8080;
+}
+
 @media (max-width: 600px) {
     .stats-grid {
         grid-template-columns: 1fr;

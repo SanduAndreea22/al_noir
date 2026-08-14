@@ -173,7 +173,7 @@ class ReservationForm(forms.ModelForm):
 
         if selected_table is None:
             raise forms.ValidationError(
-                "Sorry, the restaurant is fully booked for this time."
+                "Sorry, the restaurant is fully booked for this time. Please try a different date or time."
             )
 
         self.selected_table = selected_table

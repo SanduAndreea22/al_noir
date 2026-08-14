@@ -89,6 +89,7 @@ def client_dashboard(request):
         'reservations': Reservation.objects.filter(user=request.user).select_related('table').order_by('-reservation_date'),
         'loyalty_account': account,
         'redemptions': account.redemptions.select_related('reward').all()[:5],
+        'today': timezone.localdate(),
     })
 
 
