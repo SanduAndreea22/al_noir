@@ -6,6 +6,12 @@
     <section class="mb-5">
         <h2>Al Noir Loyalty</h2>
         <p>You have <strong>{{ loyalty_account.points }} points</strong>. At 100 points you get a free dessert.</p>
+
+        <div class="loyalty-progress" role="progressbar" aria-valuenow="{{ loyalty_progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="loyalty-progress-bar" style="width: {{ loyalty_progress_percent }}%;"></div>
+        </div>
+        <p class="small mt-1">{{ loyalty_progress_percent }}/100 points toward your next free dessert.</p>
+
         {% if loyalty_account.points >= 100 %}
         <form method="post" action="{% url 'operations:redeem_reward' %}" class="mt-3">
             {% csrf_token %}
@@ -14,7 +20,12 @@
         {% endif %}
         <ul class="mt-3">
             {% for redemption in redemptions %}
-                <li>{{ redemption.reward.name }} — code: <strong>{{ redemption.code }}</strong>{% if redemption.is_used %} (used){% endif %}</li>
+                <li>
+                    {{ redemption.reward.name }} — code: <strong id="redemption-code-{{ redemption.pk }}">{{ redemption.code }}</strong>{% if redemption.is_used %} (used){% endif %}
+                    {% if not redemption.is_used %}
+                        <button type="button" class="btn-copy-code" data-copy-target="redemption-code-{{ redemption.pk }}">Copy</button>
+                    {% endif %}
+                </li>
             {% endfor %}
         </ul>
     </section>

@@ -85,11 +85,14 @@ def event_booking(request, pk):
 @login_required
 def client_dashboard(request):
     account, _ = LoyaltyAccount.objects.get_or_create(user=request.user)
+    points = account.points
+    progress_percent = 100 if (points > 0 and points % 100 == 0) else points % 100
     return render(request, 'operations/client_dashboard.html', {
         'reservations': Reservation.objects.filter(user=request.user).select_related('table').order_by('-reservation_date'),
         'loyalty_account': account,
         'redemptions': account.redemptions.select_related('reward').all()[:5],
         'today': timezone.localdate(),
+        'loyalty_progress_percent': progress_percent,
     })
 
 

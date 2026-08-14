@@ -1,3 +1,28 @@
+document.addEventListener("click", function (event) {
+    const button = event.target.closest(".btn-copy-code");
+    if (!button) {
+        return;
+    }
+    const target = document.getElementById(button.dataset.copyTarget);
+    if (!target || !navigator.clipboard) {
+        return;
+    }
+    navigator.clipboard.writeText(target.textContent.trim()).then(function () {
+        const original = button.textContent;
+        button.textContent = "Copied!";
+        setTimeout(function () {
+            button.textContent = original;
+        }, 1500);
+    });
+});
+
+function createSuccessCheck() {
+    const wrapper = document.createElement("span");
+    wrapper.className = "success-check-wrap";
+    wrapper.innerHTML = '<svg class="success-check" viewBox="0 0 52 52" aria-hidden="true"><circle class="success-check-circle" cx="26" cy="26" r="24" fill="none"/><path class="success-check-mark" fill="none" d="M14 27l7 7 16-16"/></svg>';
+    return wrapper;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const revealElements = document.querySelectorAll(".reveal");
 
@@ -68,7 +93,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         function showMessage(type, text) {
             messageBox.className = `contact-message-box ${type}`;
-            messageBox.textContent = text;
+            messageBox.innerHTML = "";
+            if (type === "success") {
+                messageBox.appendChild(createSuccessCheck());
+            }
+            const textSpan = document.createElement("span");
+            textSpan.textContent = text;
+            messageBox.appendChild(textSpan);
             messageBox.style.display = "block";
             messageBox.style.opacity = "1";
         }
@@ -177,7 +208,13 @@ if (reviewForm) {
 
     function showReviewMessage(type, text) {
         messageBox.className = `contact-message-box ${type}`;
-        messageBox.textContent = text;
+        messageBox.innerHTML = "";
+        if (type === "success") {
+            messageBox.appendChild(createSuccessCheck());
+        }
+        const textSpan = document.createElement("span");
+        textSpan.textContent = text;
+        messageBox.appendChild(textSpan);
         messageBox.style.display = "block";
         messageBox.style.opacity = "1";
     }

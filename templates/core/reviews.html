@@ -93,8 +93,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.rating.id_for_label }}">Rating</label>
-                    {{ form.rating }}
+                    <label>Rating</label>
+                    <div class="star-rating">
+                        {% for radio in form.rating %}
+                            {{ radio.tag }}
+                            <label for="{{ radio.id_for_label }}">★</label>
+                        {% endfor %}
+                    </div>
                     <div class="field-error" id="error-rating"></div>
                 </div>
 

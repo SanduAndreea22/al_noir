@@ -143,6 +143,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # @login_required redirects anonymous users to a 404 instead of the login form.
 LOGIN_URL = 'login'
 
+# Same issue as LOGIN_URL above: Django's default post-login redirect is
+# '/accounts/profile/', which also doesn't exist here. Without this, logging
+# in directly (not bounced there by @login_required) lands on a 404 instead
+# of the client's dashboard.
+LOGIN_REDIRECT_URL = 'operations:client_dashboard'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

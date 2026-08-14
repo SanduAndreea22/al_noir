@@ -45,7 +45,17 @@
         {% if messages %}
             <div class="container">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    <div class="alert alert-{{ message.tags }}">
+                        {% if message.tags == 'success' %}
+                            <span class="success-check-wrap">
+                                <svg class="success-check" viewBox="0 0 52 52" aria-hidden="true">
+                                    <circle class="success-check-circle" cx="26" cy="26" r="24" fill="none"/>
+                                    <path class="success-check-mark" fill="none" d="M14 27l7 7 16-16"/>
+                                </svg>
+                            </span>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
