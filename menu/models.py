@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -31,3 +32,34 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.category.name}"
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_items')
+    item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'item')
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return f'{self.user} ♥ {self.item}'
+
+
+class Rating(models.Model):
+    STARS_CHOICES = [(1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')]
+
+    item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='menu_ratings')
+    stars = models.PositiveSmallIntegerField(choices=STARS_CHOICES)
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('item', 'user')
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return f'{self.item} - {self.stars}★ by {self.user}'

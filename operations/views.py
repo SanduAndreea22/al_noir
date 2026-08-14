@@ -13,6 +13,7 @@ from django.db.models.functions import TruncDate
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from core.utils import transliterate_ro
+from menu.models import Favorite
 from reservations.models import Reservation
 from .forms import TicketForm, WaitlistForm
 from .models import Event, Expense, Invoice, LoyaltyAccount, LoyaltyRedemption, LoyaltyTransaction, Sale, StaffProfile, StaffShift, StockItem, Ticket
@@ -93,6 +94,7 @@ def client_dashboard(request):
         'redemptions': account.redemptions.select_related('reward').all()[:5],
         'today': timezone.localdate(),
         'loyalty_progress_percent': progress_percent,
+        'favorite_items': Favorite.objects.filter(user=request.user).select_related('item', 'item__category'),
     })
 
 

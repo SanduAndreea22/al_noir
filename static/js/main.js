@@ -16,6 +16,58 @@ document.addEventListener("click", function (event) {
     });
 });
 
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+        return parts.pop().split(";").shift();
+    }
+    return null;
+}
+
+document.addEventListener("click", function (event) {
+    const favoriteBtn = event.target.closest(".btn-favorite");
+    if (favoriteBtn) {
+        const url = favoriteBtn.dataset.toggleUrl;
+        fetch(url, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCookie("csrftoken") },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                favoriteBtn.classList.toggle("is-favorited", data.favorited);
+            });
+        return;
+    }
+
+    const rateStar = event.target.closest(".rate-star");
+    if (rateStar) {
+        const widget = rateStar.closest(".rate-widget");
+        const url = widget.dataset.rateUrl;
+        const stars = rateStar.dataset.stars;
+        const feedback = widget.querySelector(".rate-feedback");
+        const allStars = widget.querySelectorAll(".rate-star");
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `stars=${encodeURIComponent(stars)}`,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                allStars.forEach((s) => {
+                    s.classList.toggle("is-selected", Number(s.dataset.stars) <= Number(stars));
+                });
+                if (feedback) {
+                    feedback.textContent = data.message || "Thanks for rating!";
+                }
+            });
+    }
+});
+
 function createSuccessCheck() {
     const wrapper = document.createElement("span");
     wrapper.className = "success-check-wrap";

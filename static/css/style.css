@@ -1068,6 +1068,69 @@ textarea {
     flex: 0 0 auto;
 }
 
+.menu-item-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-favorite {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #555;
+    font-size: 20px;
+    line-height: 1;
+    transition: color var(--transition), transform var(--transition);
+}
+
+.btn-favorite:hover {
+    transform: scale(1.15);
+}
+
+.btn-favorite.is-favorited {
+    color: #e0556f;
+}
+
+.menu-item-rating {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    color: #bdbdbd;
+    font-size: 14px;
+}
+
+.rating-star-icon {
+    color: var(--color-gold);
+}
+
+.rate-widget {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.rate-star {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #444;
+    font-size: 16px;
+    line-height: 1;
+    transition: color var(--transition);
+}
+
+.rate-star:hover,
+.rate-star.is-selected {
+    color: var(--color-gold);
+}
+
+.rate-feedback {
+    color: #7ed99a;
+}
+
 .price {
     color: var(--color-gold);
     font-size: 20px;
