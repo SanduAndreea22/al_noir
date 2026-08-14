@@ -138,6 +138,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Django's default LOGIN_URL is '/accounts/login/', which this project doesn't
+# define (the actual login page is 'login', i.e. /login/). Without this,
+# @login_required redirects anonymous users to a 404 instead of the login form.
+LOGIN_URL = 'login'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

@@ -7,6 +7,8 @@
 <section class="container py-5">
     <h1 class="mb-4">Reserve a Table</h1>
 
+    <p class="small mb-4">Online reservations are available for dinner service (18:00–22:00). For lunch or same-day requests, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
+
     <form method="post" novalidate>
         {% csrf_token %}
 
@@ -17,6 +19,7 @@
                 </label>
 
                 {% if field.name == 'selected_items' %}
+                    <p class="small mb-2">Optional — selecting menu items now pays a 10% deposit toward your meal in advance. You can also skip this and just reserve the table.</p>
                     <div class="menu-checkbox-list">
                         {% for checkbox in field %}
                             <label class="menu-checkbox">
@@ -27,6 +30,9 @@
                     </div>
                 {% else %}
                     {{ field }}
+                    {% if field.name == 'guests' %}
+                        <p class="small mt-1">For groups larger than 10, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
+                    {% endif %}
                 {% endif %}
 
                 {% if field.errors %}
@@ -52,6 +58,8 @@
             Reserve Now
         </button>
     </form>
+
+    <p class="small mt-3">Need to cancel or change a reservation? Call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}{% if site_settings.email %} or email {{ site_settings.email }}{% endif %} at least 2 hours in advance.</p>
 </section>
 <script src="{% static 'js/reservation-deposit.js' %}" defer></script>
 {% endblock %}

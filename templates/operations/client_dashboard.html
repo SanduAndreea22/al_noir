@@ -30,6 +30,7 @@
                     <th>Status</th>
                     <th>Deposit</th>
                     <th>Promo</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,10 +42,20 @@
                     <td>{{ item.get_status_display }}</td>
                     <td>${{ item.advance_amount }} {% if item.advance_paid %}(paid){% endif %}</td>
                     <td>{{ item.promo_code|default:'—' }}</td>
+                    <td>
+                        {% if item.status == 'pending' or item.status == 'confirmed' %}
+                            {% if item.reservation_date >= today %}
+                            <form method="post" action="{% url 'reservations:cancel_reservation' item.pk %}" class="cancel-reservation-form" onsubmit="return confirm('Cancel this reservation?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-cancel-link">Cancel</button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6">You don't have any reservations yet.</td>
+                    <td colspan="7">You don't have any reservations yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>

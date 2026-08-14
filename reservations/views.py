@@ -3,8 +3,10 @@ import logging
 from django import forms as django_forms
 from django.contrib import messages
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -109,6 +111,19 @@ def payment_success(request, pk):
     else:
         messages.warning(request, 'Your payment is being verified. We will contact you to confirm.')
     return redirect('operations:client_dashboard' if request.user.is_authenticated else 'reservations:reservations')
+
+
+@login_required
+@require_POST
+def cancel_reservation(request, pk):
+    """Lets a logged-in guest cancel their own upcoming reservation from the client dashboard."""
+    from .models import Reservation
+    reservation = get_object_or_404(Reservation, pk=pk, user=request.user)
+    if reservation.status in ('pending', 'confirmed'):
+        reservation.status = 'cancelled'
+        reservation.save(update_fields=['status'])
+        messages.success(request, 'Your reservation has been cancelled.')
+    return redirect('operations:client_dashboard')
 
 
 @csrf_exempt
