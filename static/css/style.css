@@ -246,14 +246,92 @@ textarea {
     font-weight: 700;
 }
 
+.star-rating {
+    position: relative;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.star-rating input {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.star-rating label {
+    margin-bottom: 0;
+    color: #444;
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+}
+
+.star-rating input:checked ~ label {
+    color: var(--color-gold);
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: var(--color-gold-light);
+    transform: scale(1.12);
+}
+
+.star-rating input:focus-visible + label {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+}
+
 .contact-message-box,
 .alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 14px 16px;
     margin-bottom: 24px;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
     font-size: 14px;
     transition: opacity var(--transition);
+}
+
+.success-check-wrap {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.success-check {
+    width: 22px;
+    height: 22px;
+}
+
+.success-check-circle {
+    stroke: #7ed99a;
+    stroke-width: 3;
+    stroke-dasharray: 151;
+    stroke-dashoffset: 151;
+    animation: successCircle 0.5s ease forwards;
+}
+
+.success-check-mark {
+    stroke: #7ed99a;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 32;
+    stroke-dashoffset: 32;
+    animation: successMark 0.35s 0.45s ease forwards;
+}
+
+@keyframes successCircle {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes successMark {
+    to { stroke-dashoffset: 0; }
 }
 
 .contact-message-box.success,
@@ -436,6 +514,17 @@ textarea {
     background: url("/static/images/story.png") center/cover no-repeat;
 }
 
+.hero-section::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.16), transparent 40%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.06), transparent 45%);
+    animation: floatGlow 10s ease-in-out infinite alternate;
+}
+
 .hero-bg,
 .hero-overlay {
     position: absolute;
@@ -606,7 +695,8 @@ textarea {
 .feature-card:hover,
 .contact-info-card:hover,
 .contact-form-card:hover,
-.review-form-section:hover {
+.review-form-section:hover,
+.review-card:hover {
     transform: translateY(-4px);
     border-color: rgba(212, 175, 55, 0.3);
     box-shadow: var(--shadow-card);
@@ -978,6 +1068,69 @@ textarea {
     flex: 0 0 auto;
 }
 
+.menu-item-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-favorite {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #555;
+    font-size: 20px;
+    line-height: 1;
+    transition: color var(--transition), transform var(--transition);
+}
+
+.btn-favorite:hover {
+    transform: scale(1.15);
+}
+
+.btn-favorite.is-favorited {
+    color: #e0556f;
+}
+
+.menu-item-rating {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    color: #bdbdbd;
+    font-size: 14px;
+}
+
+.rating-star-icon {
+    color: var(--color-gold);
+}
+
+.rate-widget {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.rate-star {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #444;
+    font-size: 16px;
+    line-height: 1;
+    transition: color var(--transition);
+}
+
+.rate-star:hover,
+.rate-star.is-selected {
+    color: var(--color-gold);
+}
+
+.rate-feedback {
+    color: #7ed99a;
+}
+
 .price {
     color: var(--color-gold);
     font-size: 20px;
@@ -1265,6 +1418,40 @@ textarea {
 
 .filter-form .form-group {
     margin-bottom: 0;
+}
+
+.loyalty-progress {
+    width: 100%;
+    max-width: 360px;
+    height: 10px;
+    margin-top: 14px;
+    border-radius: 999px;
+    background-color: var(--color-surface-soft);
+    overflow: hidden;
+}
+
+.loyalty-progress-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--color-gold), var(--color-gold-light));
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+    transition: width 0.8s ease;
+}
+
+.btn-copy-code {
+    margin-left: 8px;
+    padding: 2px 10px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-gold);
+    font-size: 12px;
+    transition: background-color var(--transition), color var(--transition);
+}
+
+.btn-copy-code:hover {
+    background-color: var(--color-gold);
+    color: #111;
 }
 
 .dashboard-section {

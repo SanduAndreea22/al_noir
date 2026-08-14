@@ -1,3 +1,80 @@
+document.addEventListener("click", function (event) {
+    const button = event.target.closest(".btn-copy-code");
+    if (!button) {
+        return;
+    }
+    const target = document.getElementById(button.dataset.copyTarget);
+    if (!target || !navigator.clipboard) {
+        return;
+    }
+    navigator.clipboard.writeText(target.textContent.trim()).then(function () {
+        const original = button.textContent;
+        button.textContent = "Copied!";
+        setTimeout(function () {
+            button.textContent = original;
+        }, 1500);
+    });
+});
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+        return parts.pop().split(";").shift();
+    }
+    return null;
+}
+
+document.addEventListener("click", function (event) {
+    const favoriteBtn = event.target.closest(".btn-favorite");
+    if (favoriteBtn) {
+        const url = favoriteBtn.dataset.toggleUrl;
+        fetch(url, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCookie("csrftoken") },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                favoriteBtn.classList.toggle("is-favorited", data.favorited);
+            });
+        return;
+    }
+
+    const rateStar = event.target.closest(".rate-star");
+    if (rateStar) {
+        const widget = rateStar.closest(".rate-widget");
+        const url = widget.dataset.rateUrl;
+        const stars = rateStar.dataset.stars;
+        const feedback = widget.querySelector(".rate-feedback");
+        const allStars = widget.querySelectorAll(".rate-star");
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `stars=${encodeURIComponent(stars)}`,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                allStars.forEach((s) => {
+                    s.classList.toggle("is-selected", Number(s.dataset.stars) <= Number(stars));
+                });
+                if (feedback) {
+                    feedback.textContent = data.message || "Thanks for rating!";
+                }
+            });
+    }
+});
+
+function createSuccessCheck() {
+    const wrapper = document.createElement("span");
+    wrapper.className = "success-check-wrap";
+    wrapper.innerHTML = '<svg class="success-check" viewBox="0 0 52 52" aria-hidden="true"><circle class="success-check-circle" cx="26" cy="26" r="24" fill="none"/><path class="success-check-mark" fill="none" d="M14 27l7 7 16-16"/></svg>';
+    return wrapper;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const revealElements = document.querySelectorAll(".reveal");
 
@@ -68,7 +145,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         function showMessage(type, text) {
             messageBox.className = `contact-message-box ${type}`;
-            messageBox.textContent = text;
+            messageBox.innerHTML = "";
+            if (type === "success") {
+                messageBox.appendChild(createSuccessCheck());
+            }
+            const textSpan = document.createElement("span");
+            textSpan.textContent = text;
+            messageBox.appendChild(textSpan);
             messageBox.style.display = "block";
             messageBox.style.opacity = "1";
         }
@@ -177,7 +260,13 @@ if (reviewForm) {
 
     function showReviewMessage(type, text) {
         messageBox.className = `contact-message-box ${type}`;
-        messageBox.textContent = text;
+        messageBox.innerHTML = "";
+        if (type === "success") {
+            messageBox.appendChild(createSuccessCheck());
+        }
+        const textSpan = document.createElement("span");
+        textSpan.textContent = text;
+        messageBox.appendChild(textSpan);
         messageBox.style.display = "block";
         messageBox.style.opacity = "1";
     }

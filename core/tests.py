@@ -1,7 +1,15 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
 from .models import ContactMessage, Review
+
+
+class LoginRedirectTests(TestCase):
+    def test_login_redirects_to_client_dashboard_not_a_404(self):
+        User.objects.create_user('guest', password='test-password')
+        response = self.client.post(reverse('login'), {'username': 'guest', 'password': 'test-password'})
+        self.assertRedirects(response, reverse('operations:client_dashboard'))
 
 
 class ContactFormTests(TestCase):

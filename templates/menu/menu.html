@@ -44,8 +44,34 @@
                     <div class="menu-item">
 
                         <div class="menu-item-left">
-                            <h3>{{ item.name }}</h3>
+                            <div class="menu-item-title-row">
+                                <h3>{{ item.name }}</h3>
+                                {% if user.is_authenticated %}
+                                    <button type="button"
+                                            class="btn-favorite {% if item.pk in favorite_ids %}is-favorited{% endif %}"
+                                            data-toggle-url="{% url 'toggle_favorite' item.pk %}"
+                                            aria-label="Save to favorites">♥</button>
+                                {% endif %}
+                            </div>
                             <p>{{ item.description }}</p>
+
+                            <div class="menu-item-rating">
+                                {% if item.rating_count %}
+                                    <span><span class="rating-star-icon">★</span> {{ item.avg_rating|floatformat:1 }} <span class="small">({{ item.rating_count }})</span></span>
+                                {% else %}
+                                    <span class="small">No ratings yet</span>
+                                {% endif %}
+
+                                {% if user.is_authenticated %}
+                                    <div class="rate-widget" data-rate-url="{% url 'rate_item' item.pk %}">
+                                        <span class="small">Rate:</span>
+                                        {% for i in "12345" %}
+                                            <button type="button" class="rate-star" data-stars="{{ forloop.counter }}" aria-label="Rate {{ forloop.counter }} stars">★</button>
+                                        {% endfor %}
+                                        <span class="rate-feedback small" aria-live="polite"></span>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
 
                         <div class="menu-item-right">
