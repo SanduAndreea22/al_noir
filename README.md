@@ -34,18 +34,19 @@ This isn't a CRUD tutorial project. It started as an existing, untested Django c
 - **Broken financial aggregation**: a report query aliased `quantity=Sum('quantity')`, which shadowed the real field and caused an aggregate-over-aggregate error — the report crashed on every single request until traced and fixed.
 - **Unenforced event capacity**: `Event.capacity` existed as a field but was never checked, so events could be oversold without limit.
 
-Every fix above was verified locally (`manage.py check`, `manage.py test`, and manual functional testing) before being committed — see commit history for the full list (13 bugs fixed across two audit passes).
+Every fix above was verified locally (`manage.py check`, `manage.py test`, and manual functional testing) before being committed — see commit history for the full list, across three audit-and-remediation passes (security/data-integrity, then design/UX/copy, then a full reservation-flow redesign).
 
 ## Feature overview
 
 **Public site**
 - Menu with categories, pricing, and loyalty-reward items
-- Table reservations with an optional paid deposit via Stripe Checkout
+- Table reservations with an optional paid deposit via Stripe Checkout, and a persistent, bookmarkable confirmation page so a guest without an account still has proof of their reservation after closing the tab
 - Event listings with ticket booking and a waitlist for sold-out slots
-- Contact form (persisted to the DB and visible in Django admin)
+- Contact form (persisted to the DB and visible in Django admin), with an integrated map on the Contact page
+- Mobile navigation collapses into a hamburger menu below 992px
 
 **Client account**
-- Dashboard showing reservation history, loyalty point balance, and redeemable rewards
+- Dashboard showing reservation history, loyalty point balance, and redeemable rewards, with an animated reveal badge once a reward is unlocked
 - PDF invoice generation for paid reservations
 
 **Staff back-office** (role-gated)
@@ -58,7 +59,7 @@ Every fix above was verified locally (`manage.py check`, `manage.py test`, and m
 
 ## Tech stack
 
-- **Backend:** Django 5.2, Django REST Framework
+- **Backend:** Django 5.2
 - **Database:** PostgreSQL (Neon) in production, SQLite for local dev
 - **Payments:** Stripe Checkout + webhooks
 - **Media storage:** Cloudinary
