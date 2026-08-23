@@ -32,6 +32,11 @@
              id="cat-{{ category.id }}">
 
             <div class="menu-category-header">
+                {% if category.image %}
+                    <div class="menu-category-image">
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                    </div>
+                {% endif %}
                 <h2>{{ category.name }}</h2>
                 <div class="divider"></div>
             </div>
@@ -50,7 +55,9 @@
                                     <button type="button"
                                             class="btn-favorite {% if item.pk in favorite_ids %}is-favorited{% endif %}"
                                             data-toggle-url="{% url 'toggle_favorite' item.pk %}"
-                                            aria-label="Save to favorites">♥</button>
+                                            data-label-add="Save to favorites"
+                                            data-label-remove="Remove from favorites"
+                                            aria-label="{% if item.pk in favorite_ids %}Remove from favorites{% else %}Save to favorites{% endif %}">♥</button>
                                 {% endif %}
                             </div>
                             <p>{{ item.description }}</p>
@@ -66,7 +73,7 @@
                                     <div class="rate-widget" data-rate-url="{% url 'rate_item' item.pk %}">
                                         <span class="small">Rate:</span>
                                         {% for i in "12345" %}
-                                            <button type="button" class="rate-star" data-stars="{{ forloop.counter }}" aria-label="Rate {{ forloop.counter }} stars">★</button>
+                                            <button type="button" class="rate-star" data-stars="{{ forloop.counter }}" aria-label="Rate {{ forloop.counter }} star{{ forloop.counter|pluralize }}">★</button>
                                         {% endfor %}
                                         <span class="rate-feedback small" aria-live="polite"></span>
                                     </div>

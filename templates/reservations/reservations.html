@@ -4,62 +4,125 @@
 {% block title %}Reservations{% endblock %}
 
 {% block content %}
-<section class="container py-5">
-    <h1 class="mb-4">Reserve a Table</h1>
+<section class="reservation-section">
+    <div class="reservation-container">
+        <h1 class="reservation-title">Reserve a Table</h1>
+        <p class="reservation-subtitle">
+            Online reservations are available for dinner service (6:00 PM – 10:00 PM). For lunch or same-day requests, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.
+        </p>
 
-    <p class="small mb-4">Online reservations are available for dinner service (18:00–22:00). For lunch or same-day requests, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+            <div class="reservation-grid">
+                <div class="reservation-card">
+                    <h2>Your Details</h2>
 
-        {% for field in form %}
-            <div class="mb-3">
-                <label for="{{ field.id_for_label }}" class="form-label">
-                    {{ field.label }}
-                </label>
-
-                {% if field.name == 'selected_items' %}
-                    <p class="small mb-2">Optional — selecting menu items now pays a 10% deposit toward your meal in advance. You can also skip this and just reserve the table.</p>
-                    <div class="menu-checkbox-list">
-                        {% for checkbox in field %}
-                            <label class="menu-checkbox">
-                                {{ checkbox.tag }}
-                                <span>{{ checkbox.choice_label }}</span>
-                            </label>
-                        {% endfor %}
+                    <div class="form-row">
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
+                        </div>
                     </div>
-                {% else %}
-                    {{ field }}
-                    {% if field.name == 'guests' %}
-                        <p class="small mt-1">For groups larger than 10, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
-                    {% endif %}
-                {% endif %}
 
-                {% if field.errors %}
-                    <div class="text-danger small">
-                        {{ field.errors }}
+                    <div class="form-row">
+                        <div class="mb-3">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}<div class="text-danger small">{{ form.phone.errors }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.guests.id_for_label }}" class="form-label">{{ form.guests.label }}</label>
+                            {{ form.guests }}
+                            <p class="small mt-1">For groups larger than 10, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
+                            {% if form.guests.errors %}<div class="text-danger small">{{ form.guests.errors }}</div>{% endif %}
+                        </div>
                     </div>
+
+                    <div class="form-row">
+                        <div class="mb-3">
+                            <label for="{{ form.reservation_date.id_for_label }}" class="form-label">{{ form.reservation_date.label }}</label>
+                            {{ form.reservation_date }}
+                            {% if form.reservation_date.errors %}<div class="text-danger small">{{ form.reservation_date.errors }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.reservation_time.id_for_label }}" class="form-label">{{ form.reservation_time.label }}</label>
+                            {{ form.reservation_time }}
+                            {% if form.reservation_time.errors %}<div class="text-danger small">{{ form.reservation_time.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reservation-card">
+                    <h2>Additional Info</h2>
+
+                    <div class="mb-3">
+                        <label for="{{ form.special_request.id_for_label }}" class="form-label">{{ form.special_request.label }}</label>
+                        {{ form.special_request }}
+                        {% if form.special_request.errors %}<div class="text-danger small">{{ form.special_request.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.promo_code.id_for_label }}" class="form-label">{{ form.promo_code.label }}</label>
+                        {{ form.promo_code }}
+                        {% if form.promo_code.errors %}<div class="text-danger small">{{ form.promo_code.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-selection">
+                <h2>Add Menu Items</h2>
+                <p>Optional — selecting menu items now pays a 10% deposit toward your meal in advance. You can also skip this and just reserve the table.</p>
+
+                {% for category in categories %}
+                    <div class="menu-category-block">
+                        <h3>{{ category.name }}</h3>
+                        <div class="menu-items-grid">
+                            {% for item in category.items.all %}
+                                {% if item.is_available %}
+                                    <label class="menu-item-option">
+                                        <input type="checkbox" name="selected_items" value="{{ item.pk }}" data-price="{{ item.price }}"{% if item.pk|stringformat:"s" in selected_ids %} checked{% endif %}>
+                                        <div class="menu-item-content">
+                                            <h4>{{ item.name }}</h4>
+                                            {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+                                            <span>${{ item.price }}</span>
+                                        </div>
+                                    </label>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% if form.selected_items.errors %}
+                    <div class="text-danger small">{{ form.selected_items.errors }}</div>
                 {% endif %}
             </div>
-        {% endfor %}
 
-        <div class="mb-3" id="advance-summary" aria-live="polite">
-            Items Total: <strong id="menu-total">$0.00</strong><br>
-            Reservation Deposit (10%): <strong id="advance-total">$0.00</strong>
-        </div>
-
-        {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                {{ form.non_field_errors }}
+            <div class="mb-3" id="advance-summary" aria-live="polite">
+                Items Total: <strong id="menu-total">$0.00</strong><br>
+                Reservation Deposit (10%): <strong id="advance-total">$0.00</strong>
             </div>
-        {% endif %}
 
-        <button type="submit" class="btn btn-gold">
-            Reserve Now
-        </button>
-    </form>
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
-    <p class="small mt-3">Need to cancel or change a reservation? Call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}{% if site_settings.email %} or email {{ site_settings.email }}{% endif %} at least 2 hours in advance.</p>
+            <div class="reservation-submit">
+                <button type="submit" class="btn btn-gold">Reserve Now</button>
+            </div>
+        </form>
+
+        <p class="small mt-3">Need to cancel or change a reservation? Call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}{% if site_settings.email %} or email {{ site_settings.email }}{% endif %} at least 2 hours in advance.</p>
+    </div>
 </section>
 <script src="{% static 'js/reservation-deposit.js' %}" defer></script>
 {% endblock %}

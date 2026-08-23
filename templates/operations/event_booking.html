@@ -7,7 +7,7 @@
     <div class="container page-hero-content">
         <p class="section-eyebrow">EVENT BOOKING</p>
         <h1>{{ event.title }}</h1>
-        <p>{{ event.starts_at|date:'d.m.Y H:i' }} · {% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</p>
+        <p>{{ event.starts_at|date:'M j, Y, g:i A' }} · {% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</p>
     </div>
 </section>
 

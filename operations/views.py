@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from django.db.models.functions import TruncDate
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from core.decorators import ratelimit_post
 from core.utils import transliterate_ro
 from menu.models import Favorite
 from reservations.models import Reservation
@@ -49,6 +50,7 @@ def events(request):
     })
 
 
+@ratelimit_post('waitlist')
 def waitlist(request):
     form = WaitlistForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -58,6 +60,7 @@ def waitlist(request):
     return render(request, 'operations/waitlist.html', {'form': form})
 
 
+@ratelimit_post('event_booking')
 def event_booking(request, pk):
     event = get_object_or_404(Event, pk=pk, is_active=True)
     if (event.ends_at or event.starts_at) < timezone.now():
@@ -134,7 +137,18 @@ def staff_dashboard(request):
     paid_expenses = Expense.objects.filter(paid=True)
     expenses_total = paid_expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0')
     expense_by_category = _expenses_by_category(paid_expenses)
-    return render(request, 'operations/staff_dashboard.html', {'sales_total': sales_total, 'advance_total': advance_total, 'ticket_total': ticket_total, 'expenses_total': expenses_total, 'expense_by_category': expense_by_category, 'profit': sales_total + advance_total + ticket_total - expenses_total, 'low_stock': StockItem.objects.filter(quantity__lt=F('minimum_quantity')), 'expired_stock': StockItem.objects.filter(expiry_date__lt=timezone.localdate()), 'pending_reservations': Reservation.objects.filter(status='pending').count(), 'invoices': Invoice.objects.all()[:5]})
+    return render(request, 'operations/staff_dashboard.html', {
+        'sales_total': sales_total,
+        'advance_total': advance_total,
+        'ticket_total': ticket_total,
+        'expenses_total': expenses_total,
+        'expense_by_category': expense_by_category,
+        'profit': sales_total + advance_total + ticket_total - expenses_total,
+        'low_stock': StockItem.objects.filter(quantity__lt=F('minimum_quantity')),
+        'expired_stock': StockItem.objects.filter(expiry_date__lt=timezone.localdate()),
+        'pending_reservations': Reservation.objects.filter(status='pending').count(),
+        'invoices': Invoice.objects.all()[:5],
+    })
 
 
 @staff_member_required
@@ -180,7 +194,13 @@ def reports(request):
 
 @staff_member_required
 def staff_schedule(request):
-    return render(request, 'operations/staff_schedule.html', {'shifts': StaffShift.objects.select_related('staff__user').filter(ends_at__gte=timezone.now()).order_by('starts_at'), 'staff': StaffProfile.objects.select_related('user')})
+    shifts = StaffShift.objects.select_related('staff__user').filter(
+        ends_at__gte=timezone.now()
+    ).order_by('starts_at')
+    return render(request, 'operations/staff_schedule.html', {
+        'shifts': shifts,
+        'staff': StaffProfile.objects.select_related('user'),
+    })
 
 
 @staff_member_required
@@ -196,14 +216,36 @@ def invoice_pdf(request, pk):
             f'Total: ${invoice.amount:.2f}', 'Status: PAID' if invoice.paid else 'Status: UNPAID',
         ]
     ]
-    def esc(value): return value.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
+    def esc(value):
+        return value.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
+
     content = 'BT /F1 12 Tf 72 760 Td ' + ' 0 -22 Td '.join(f'({esc(line)}) Tj' for line in lines) + ' ET'
-    objects = [b'<< /Type /Catalog /Pages 2 0 R >>', b'<< /Type /Pages /Kids [3 0 R] /Count 1 >>', b'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>', f'<< /Length {len(content.encode("latin-1", "replace"))} >>\nstream\n{content}\nendstream'.encode('latin-1', 'replace'), b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>']
-    pdf, offsets = bytearray(b'%PDF-1.4\n'), []
+    content_stream = (
+        f'<< /Length {len(content.encode("latin-1", "replace"))} >>\n'
+        f'stream\n{content}\nendstream'
+    ).encode('latin-1', 'replace')
+
+    objects = [
+        b'<< /Type /Catalog /Pages 2 0 R >>',
+        b'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+        b'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] '
+        b'/Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>',
+        content_stream,
+        b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+    ]
+
+    pdf = bytearray(b'%PDF-1.4\n')
+    offsets = []
     for index, obj in enumerate(objects, 1):
-        offsets.append(len(pdf)); pdf.extend(f'{index} 0 obj\n'.encode()); pdf.extend(obj); pdf.extend(b'\nendobj\n')
-    start = len(pdf); pdf.extend(f'xref\n0 {len(objects) + 1}\n0000000000 65535 f \n'.encode())
-    for offset in offsets: pdf.extend(f'{offset:010d} 00000 n \n'.encode())
+        offsets.append(len(pdf))
+        pdf.extend(f'{index} 0 obj\n'.encode())
+        pdf.extend(obj)
+        pdf.extend(b'\nendobj\n')
+
+    start = len(pdf)
+    pdf.extend(f'xref\n0 {len(objects) + 1}\n0000000000 65535 f \n'.encode())
+    for offset in offsets:
+        pdf.extend(f'{offset:010d} 00000 n \n'.encode())
     pdf.extend(f'trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{start}\n%%EOF'.encode())
     response = HttpResponse(bytes(pdf), content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="invoice-{invoice.number}.pdf"'

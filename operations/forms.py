@@ -6,12 +6,16 @@ class TicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
         fields = ('customer_name', 'customer_email', 'quantity')
-        widgets = {'customer_name': forms.TextInput(attrs={'class': 'form-control'}), 'customer_email': forms.EmailInput(attrs={'class': 'form-control'}), 'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1})}
+        widgets = {
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+        }
 
     def clean_quantity(self):
         quantity = self.cleaned_data['quantity']
         if quantity < 1:
-            raise forms.ValidationError('The number of tickets must be at least 1.')
+            raise forms.ValidationError('Please book at least 1 ticket.')
         return quantity
 
 
@@ -29,5 +33,5 @@ class WaitlistForm(forms.ModelForm):
     def clean_guests(self):
         guests = self.cleaned_data['guests']
         if guests < 1:
-            raise forms.ValidationError('The number of guests must be at least 1.')
+            raise forms.ValidationError('Please add at least 1 guest.')
         return guests

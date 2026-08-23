@@ -22,6 +22,17 @@
             <p><strong>Phone:</strong> {{ site_settings.phone }}</p>
             <p><strong>Email:</strong> {{ site_settings.email }}</p>
             <p><strong>Opening Hours:</strong> {{ site_settings.opening_hours }}</p>
+
+            {% if site_settings.address %}
+                <div class="map-embed">
+                    <iframe
+                        src="https://www.google.com/maps?q={{ site_settings.address|urlencode }}&output=embed"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Map showing {{ site_settings.restaurant_name }}">
+                    </iframe>
+                </div>
+            {% endif %}
         </div>
 
         <div class="contact-form-card reveal">

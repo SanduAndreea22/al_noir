@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <section class="container py-5 dashboard-page">
-    <h1>Client Dashboard</h1>
+    <h1 class="mb-4">Client Dashboard</h1>
 
     <section class="mb-5">
         <h2>Al Noir Loyalty</h2>
@@ -13,10 +13,14 @@
         <p class="small mt-1">{{ loyalty_progress_percent }}/100 points toward your next free dessert.</p>
 
         {% if loyalty_account.points >= 100 %}
-        <form method="post" action="{% url 'operations:redeem_reward' %}" class="mt-3">
-            {% csrf_token %}
-            <button class="btn btn-gold">Claim Free Dessert</button>
-        </form>
+        <div class="loyalty-reveal mt-3">
+            <div class="loyalty-badge">★</div>
+            <p class="loyalty-reveal-text">You've earned a free dessert!</p>
+            <form method="post" action="{% url 'operations:redeem_reward' %}">
+                {% csrf_token %}
+                <button class="btn btn-gold">Claim Free Dessert</button>
+            </form>
+        </div>
         {% endif %}
         <ul class="mt-3">
             {% for redemption in redemptions %}
@@ -43,6 +47,7 @@
 
     <div class="dashboard-section">
         <h2>My Reservations</h2>
+        <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
@@ -58,7 +63,7 @@
             <tbody>
                 {% for item in reservations %}
                 <tr>
-                    <td>{{ item.reservation_date }} {{ item.reservation_time }}</td>
+                    <td>{{ item.reservation_date|date:"M j, Y" }} {{ item.reservation_time|time:"g:i A" }}</td>
                     <td>{{ item.table|default:'To be assigned' }}</td>
                     <td>{{ item.guests }}</td>
                     <td>{{ item.get_status_display }}</td>
@@ -82,6 +87,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     </div>
 </section>
 {% endblock %}

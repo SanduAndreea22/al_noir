@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reservation Confirmed{% endblock %}
+
+{% block content %}
+<section class="reservation-section">
+    <div class="reservation-container">
+        <h1 class="reservation-title">Reservation Confirmed</h1>
+        <p class="reservation-subtitle">
+            Save or bookmark this page — it's your proof of reservation.
+        </p>
+
+        <div class="reservation-card">
+            <h2>Reservation #{{ reservation.pk }}</h2>
+
+            <div class="form-row">
+                <div>
+                    <p class="small mb-1">Name</p>
+                    <p>{{ reservation.name }}</p>
+                </div>
+                <div>
+                    <p class="small mb-1">Status</p>
+                    <p>{{ reservation.get_status_display }}</p>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <p class="small mb-1">Date</p>
+                    <p>{{ reservation.reservation_date|date:"M j, Y" }}</p>
+                </div>
+                <div>
+                    <p class="small mb-1">Time</p>
+                    <p>{{ reservation.reservation_time|time:"g:i A" }}</p>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <p class="small mb-1">Guests</p>
+                    <p>{{ reservation.guests }}</p>
+                </div>
+                <div>
+                    <p class="small mb-1">Table</p>
+                    <p>{% if reservation.table %}#{{ reservation.table.number }}{% else %}To be assigned{% endif %}</p>
+                </div>
+            </div>
+
+            {% if reservation.selected_items.all %}
+                <p class="small mb-1">Pre-ordered items</p>
+                <p>{% for item in reservation.selected_items.all %}{{ item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+            {% endif %}
+
+            {% if reservation.advance_amount > 0 %}
+                <div class="form-row">
+                    <div>
+                        <p class="small mb-1">Deposit</p>
+                        <p>${{ reservation.advance_amount }}</p>
+                    </div>
+                    <div>
+                        <p class="small mb-1">Payment</p>
+                        <p>{% if reservation.advance_paid %}Paid{% else %}Pending{% endif %}</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if reservation.special_request %}
+                <p class="small mb-1">Special requests</p>
+                <p>{{ reservation.special_request }}</p>
+            {% endif %}
+        </div>
+
+        <p class="small mt-4">
+            Need to cancel or change this reservation? Call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}{% if site_settings.email %} or email {{ site_settings.email }}{% endif %}, and mention reservation #{{ reservation.pk }}.
+        </p>
+    </div>
+</section>
+{% endblock %}

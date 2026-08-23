@@ -16,6 +16,26 @@ document.addEventListener("click", function (event) {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const menuToggle = document.getElementById("menuToggle");
+    const navbarCollapse = document.getElementById("navbarCollapse");
+    if (!menuToggle || !navbarCollapse) {
+        return;
+    }
+
+    menuToggle.addEventListener("click", function () {
+        const isOpen = navbarCollapse.classList.toggle("open");
+        menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    navbarCollapse.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+            navbarCollapse.classList.remove("open");
+            menuToggle.setAttribute("aria-expanded", "false");
+        });
+    });
+});
+
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -36,6 +56,10 @@ document.addEventListener("click", function (event) {
             .then((response) => response.json())
             .then((data) => {
                 favoriteBtn.classList.toggle("is-favorited", data.favorited);
+                favoriteBtn.setAttribute(
+                    "aria-label",
+                    data.favorited ? favoriteBtn.dataset.labelRemove : favoriteBtn.dataset.labelAdd
+                );
             });
         return;
     }

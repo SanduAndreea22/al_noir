@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 from .models import Review
 from .forms import ReviewForm
 from .utils import form_json_response, is_ajax
+from .decorators import ratelimit_post
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
@@ -17,6 +18,7 @@ def home(request):
 def about(request):
     return render(request, 'core/about.html')
 
+@ratelimit_post('contact')
 def contact(request):
     if request.method == 'POST':
         form = ContactMessageForm(request.POST)
@@ -33,6 +35,7 @@ def contact(request):
         'form': form
     })
 
+@ratelimit_post('review')
 def reviews(request):
     reviews_list = Review.objects.filter(is_approved=True).order_by('-created_at')
 

@@ -65,8 +65,6 @@ INSTALLED_APPS = [
     "menu",
     "reservations",
     "operations",
-    "rest_framework",
-
 ]
 
 MIDDLEWARE = [
@@ -235,3 +233,68 @@ if RENDER_EXTERNAL_HOSTNAME:
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+    SECURE_SSL_REDIRECT = True
+
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))  # set to 31536000 after you test
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False') == 'True'
+    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False') == 'True'
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+    X_FRAME_OPTIONS = 'DENY'
+
+# Who gets emailed on an uncaught 500 error (in addition to the console log
+# below). Empty by default — set DJANGO_ADMINS="admin@example.com,other@example.com"
+# to enable; requires a real EMAIL_BACKEND to actually be delivered.
+ADMINS = [
+    (email.strip(), email.strip())
+    for email in os.environ.get('DJANGO_ADMINS', '').split(',')
+    if email.strip()
+]
+
+# Console logging so errors are visible in the Render logs even without an
+# external error-tracking service (e.g. Sentry); also emails ADMINS (if set).
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {name}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}

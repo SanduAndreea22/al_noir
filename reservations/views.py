@@ -45,7 +45,7 @@ def reservations(request):
                     "Your reservation has been sent successfully! We will confirm it shortly."
                 )
 
-                return redirect("reservations:reservations")
+                return redirect("reservations:confirmation", pk=reservation.pk, token=reservation.access_token)
 
     else:
 
@@ -54,6 +54,7 @@ def reservations(request):
     context = {
         "form": form,
         "categories": categories,
+        "selected_ids": request.POST.getlist("selected_items") if request.method == "POST" else [],
     }
 
     return render(
@@ -75,17 +76,29 @@ def checkout(request, pk, token):
     try:
         import stripe
         stripe.api_key = settings.STRIPE_SECRET_KEY
+        line_items = [{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {'name': f'Al Noir reservation deposit #{reservation.pk}'},
+                'unit_amount': int(reservation.advance_amount * 100),
+            },
+            'quantity': 1,
+        }]
+        success_url = request.build_absolute_uri(
+            reverse('reservations:payment_success', args=[reservation.pk])
+        ) + '?session_id={CHECKOUT_SESSION_ID}'
         session = stripe.checkout.Session.create(
             mode='payment',
             payment_method_types=['card'],
             customer_email=reservation.email,
-            line_items=[{'price_data': {'currency': 'usd', 'product_data': {'name': f'Al Noir reservation deposit #{reservation.pk}'}, 'unit_amount': int(reservation.advance_amount * 100)}, 'quantity': 1}],
+            line_items=line_items,
             metadata={'reservation_id': str(reservation.pk)},
-            success_url=request.build_absolute_uri(reverse('reservations:payment_success', args=[reservation.pk])) + '?session_id={CHECKOUT_SESSION_ID}',
+            success_url=success_url,
             cancel_url=request.build_absolute_uri(reverse('reservations:reservations')),
+            idempotency_key=f'reservation-checkout-{reservation.access_token}',
         )
     except ImportError:
-        messages.error(request, "The Stripe module is not installed on the server.")
+        messages.error(request, "Online payment isn't available right now. Your reservation has been recorded — we'll contact you to arrange payment.")
         return redirect("reservations:reservations")
     reservation.stripe_checkout_session_id = session.id
     reservation.save(update_fields=['stripe_checkout_session_id'])
@@ -96,6 +109,7 @@ def payment_success(request, pk):
     from .models import Reservation
     reservation = get_object_or_404(Reservation, pk=pk)
     session_id = request.GET.get('session_id')
+    guest_redirect = redirect('reservations:confirmation', pk=reservation.pk, token=reservation.access_token)
     if settings.STRIPE_SECRET_KEY and session_id and session_id == reservation.stripe_checkout_session_id and not reservation.advance_paid:
         try:
             import stripe
@@ -105,12 +119,23 @@ def payment_success(request, pk):
                 reservation.save(update_fields=['advance_paid'])
         except Exception:
             messages.warning(request, 'Your payment is being verified. We will contact you to confirm.')
-            return redirect('operations:client_dashboard' if request.user.is_authenticated else 'reservations:reservations')
+            return redirect('operations:client_dashboard') if request.user.is_authenticated else guest_redirect
     if reservation.advance_paid:
         messages.success(request, 'Thank you! Your deposit payment has been confirmed.')
     else:
         messages.warning(request, 'Your payment is being verified. We will contact you to confirm.')
-    return redirect('operations:client_dashboard' if request.user.is_authenticated else 'reservations:reservations')
+    return redirect('operations:client_dashboard') if request.user.is_authenticated else guest_redirect
+
+
+def confirmation(request, pk, token):
+    """Persistent, bookmarkable confirmation page for guests without an account —
+    survives a refresh, unlike a one-off messages banner."""
+    from .models import Reservation
+    reservation = get_object_or_404(
+        Reservation.objects.select_related('table').prefetch_related('selected_items'),
+        pk=pk, access_token=token,
+    )
+    return render(request, 'reservations/confirmation.html', {'reservation': reservation})
 
 
 @login_required

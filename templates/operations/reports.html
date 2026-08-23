@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <section class="container py-5 dashboard-page">
-    <h1>Reports</h1>
+    <h1 class="mb-4">Reports</h1>
 
     <form method="get" class="filter-form">
         <div class="form-group">
@@ -53,6 +53,7 @@
 
     <div class="dashboard-section">
         <h2>Popular Items</h2>
+        <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
@@ -75,6 +76,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     </div>
 </section>
 {% endblock %}

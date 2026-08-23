@@ -12,15 +12,15 @@ from operations.models import PromoCode
 
 
 TIME_CHOICES = [
-    ("18:00", "18:00"),
-    ("18:30", "18:30"),
-    ("19:00", "19:00"),
-    ("19:30", "19:30"),
-    ("20:00", "20:00"),
-    ("20:30", "20:30"),
-    ("21:00", "21:00"),
-    ("21:30", "21:30"),
-    ("22:00", "22:00"),
+    ("18:00", "6:00 PM"),
+    ("18:30", "6:30 PM"),
+    ("19:00", "7:00 PM"),
+    ("19:30", "7:30 PM"),
+    ("20:00", "8:00 PM"),
+    ("20:30", "8:30 PM"),
+    ("21:00", "9:00 PM"),
+    ("21:30", "9:30 PM"),
+    ("22:00", "10:00 PM"),
 ]
 
 
@@ -145,31 +145,36 @@ class ReservationForm(forms.ModelForm):
                 "Reservations must be made at least 2 hours in advance."
             )
 
-        available_tables = Table.objects.filter(
+        candidate_tables = list(Table.objects.filter(
             status="available",
             capacity__gte=guests
         ).order_by(
             "capacity",
             "number"
-        )
+        ))
 
-        selected_table = None
+        if not candidate_tables:
+            raise forms.ValidationError(
+                "We don't have a table large enough for a group this size booked online. "
+                "Please call us to arrange a reservation for larger groups."
+            )
 
-        for table in available_tables:
-
-            exists = Reservation.objects.filter(
-                table=table,
+        booked_table_ids = set(
+            Reservation.objects.filter(
+                table__in=candidate_tables,
                 reservation_date=reservation_date,
                 reservation_time=reservation_time_obj,
                 status__in=[
                     "pending",
                     "confirmed",
                 ]
-            ).exists()
+            ).values_list("table_id", flat=True)
+        )
 
-            if not exists:
-                selected_table = table
-                break
+        selected_table = next(
+            (table for table in candidate_tables if table.pk not in booked_table_ids),
+            None
+        )
 
         if selected_table is None:
             raise forms.ValidationError(

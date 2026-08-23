@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found | {{ site_settings.restaurant_name }}{% endblock %}
+
+{% block content %}
+<section class="reservation-section">
+    <div class="reservation-container" style="text-align: center;">
+        <h1 class="reservation-title">404</h1>
+        <p class="reservation-subtitle">
+            We couldn't find the page you were looking for. It may have been moved, or the link may be out of date.
+        </p>
+        <a class="btn btn-gold" href="/">Back to Home</a>
+    </div>
+</section>
+{% endblock %}

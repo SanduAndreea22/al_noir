@@ -104,3 +104,87 @@ class CancelReservationTests(TestCase):
         self.client.post(reverse('reservations:cancel_reservation', args=[self.reservation.pk]))
         self.reservation.refresh_from_db()
         self.assertEqual(self.reservation.status, 'cancelled')
+
+
+class GroupSizeValidationTests(TestCase):
+    def test_group_larger_than_any_table_gets_a_clear_message_not_fully_booked(self):
+        Table.objects.create(number=5, capacity=4)
+        slot = timezone.localtime(timezone.now() + timedelta(days=1)).replace(hour=19, minute=0)
+        form = ReservationForm(data={
+            'name': 'Big Group', 'email': 'group@example.com', 'phone': '0700000005',
+            'reservation_date': slot.date(), 'reservation_time': '19:00', 'guests': 12,
+        })
+        self.assertFalse(form.is_valid())
+        errors = list(form.non_field_errors())
+        self.assertTrue(any('table large enough' in error for error in errors), errors)
+        self.assertFalse(any('fully booked' in error for error in errors), errors)
+
+    def test_group_that_fits_but_all_matching_tables_are_booked_gets_fully_booked_message(self):
+        table = Table.objects.create(number=6, capacity=4)
+        slot = timezone.localtime(timezone.now() + timedelta(days=1)).replace(hour=19, minute=0, second=0, microsecond=0)
+        Reservation.objects.create(
+            table=table, name='Existing', email='existing@example.com', phone='0700000006',
+            reservation_date=slot.date(), reservation_time=slot.time(), guests=4, status='confirmed',
+        )
+        form = ReservationForm(data={
+            'name': 'New Guest', 'email': 'new@example.com', 'phone': '0700000007',
+            'reservation_date': slot.date(), 'reservation_time': '19:00', 'guests': 3,
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('fully booked', str(form.errors))
+
+    def test_table_lookup_uses_a_constant_number_of_queries_regardless_of_table_count(self):
+        for number in range(7, 17):
+            Table.objects.create(number=number, capacity=4)
+        slot = timezone.localtime(timezone.now() + timedelta(days=1)).replace(hour=19, minute=0)
+        data = {
+            'name': 'Query Count', 'email': 'queries@example.com', 'phone': '0700000008',
+            'reservation_date': slot.date(), 'reservation_time': '19:00', 'guests': 2,
+        }
+        # 1 query to build the menu-item pricing widget (form __init__), plus exactly
+        # 2 for table selection (candidate tables, then booked table ids) — fixed
+        # regardless of how many tables exist, unlike the old per-table .exists() loop.
+        with self.assertNumQueries(3):
+            form = ReservationForm(data=data)
+            self.assertTrue(form.is_valid(), form.errors)
+
+
+class ReservationConfirmationTests(TestCase):
+    def test_confirmation_page_shows_reservation_details(self):
+        table = Table.objects.create(number=20, capacity=2)
+        reservation = Reservation.objects.create(
+            table=table, name='Jane Guest', email='jane@example.com', phone='0700000009',
+            reservation_date=timezone.localdate() + timedelta(days=1), reservation_time='19:00',
+            guests=2, status='pending',
+        )
+        response = self.client.get(
+            reverse('reservations:confirmation', args=[reservation.pk, reservation.access_token])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'Reservation #{reservation.pk}')
+        self.assertContains(response, 'Jane Guest')
+
+    def test_confirmation_page_rejects_wrong_token(self):
+        table = Table.objects.create(number=21, capacity=2)
+        reservation = Reservation.objects.create(
+            table=table, name='Jane Guest', email='jane2@example.com', phone='0700000010',
+            reservation_date=timezone.localdate() + timedelta(days=1), reservation_time='19:00',
+            guests=2, status='pending',
+        )
+        response = self.client.get(
+            reverse('reservations:confirmation', args=[reservation.pk, 'wrong-token'])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_reservation_without_deposit_redirects_to_confirmation_page(self):
+        Table.objects.create(number=22, capacity=4)
+        slot = timezone.localtime(timezone.now() + timedelta(days=1)).replace(hour=19, minute=0)
+        response = self.client.post(reverse('reservations:reservations'), data={
+            'name': 'No Deposit', 'email': 'nodeposit@example.com', 'phone': '0700000011',
+            'reservation_date': slot.date(), 'reservation_time': '19:00', 'guests': 2,
+        })
+        reservation = Reservation.objects.get(email='nodeposit@example.com')
+        self.assertRedirects(
+            response,
+            reverse('reservations:confirmation', args=[reservation.pk, reservation.access_token])
+        )

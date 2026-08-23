@@ -1,3 +1,12 @@
 {% extends 'base.html' %}
+
 {% block title %}Privacy Policy{% endblock %}
-{% block content %}<section class="container py-5"><h1>Privacy Policy</h1><p>We collect the data necessary for reservations, accounts, replies to messages, and payments: name, contact details, and reservation details.</p><p>This data is used solely to provide the restaurant's services, comply with legal obligations, and communicate with you about your reservation. We do not store card details; online payments are processed by our payment provider.</p><p>To access, correct, or delete your data, contact us at {{ site_settings.email }}.</p></section>{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <h1 class="mb-4">Privacy Policy</h1>
+    <p>We collect the data necessary for reservations, accounts, replies to messages, and payments: name, contact details, and reservation details.</p>
+    <p>This data is used solely to provide the restaurant's services, comply with legal obligations, and communicate with you about your reservation. We do not store card details; online payments are processed by our payment provider.</p>
+    <p>To access, correct, or delete your data, contact us at {{ site_settings.email }}.</p>
+</section>
+{% endblock %}

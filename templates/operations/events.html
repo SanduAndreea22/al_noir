@@ -21,7 +21,7 @@
             <div class="events-grid">
                 {% for event in upcoming_events %}
                     <div class="event-card reveal">
-                        <span class="event-date">{{ event.starts_at|date:'d.m.Y H:i' }}</span>
+                        <span class="event-date">{{ event.starts_at|date:'M j, Y, g:i A' }}</span>
                         <h3>{{ event.title }}</h3>
                         <p>{{ event.description }}</p>
                         <span class="event-price">{% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</span>
@@ -46,7 +46,7 @@
         <div class="events-grid">
             {% for event in past_events %}
                 <div class="event-card event-card-past reveal">
-                    <span class="event-date">{{ event.starts_at|date:'d.m.Y H:i' }}</span>
+                    <span class="event-date">{{ event.starts_at|date:'M j, Y, g:i A' }}</span>
                     <h3>{{ event.title }}</h3>
                     <p>{{ event.description }}</p>
                 </div>
