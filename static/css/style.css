@@ -360,17 +360,6 @@ textarea {
     color: #ffe8b3;
 }
 
-.reveal {
-    opacity: 0;
-    transform: translateY(42px);
-    transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.reveal.active {
-    opacity: 1;
-    transform: translateY(0);
-}
-
 /* =========================
    NAVBAR
 ========================= */
@@ -502,25 +491,6 @@ textarea {
     color: var(--color-gold);
 }
 
-.hours-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.08);
-    color: var(--color-muted);
-    font-size: 14px;
-}
-
-.hours-row span:first-child {
-    color: var(--color-soft);
-}
-
-.hours-row span:last-child {
-    color: #fff;
-    font-weight: 500;
-}
-
 .footer-bottom {
     margin-top: 36px;
     padding: 20px 0;
@@ -542,7 +512,7 @@ textarea {
     overflow: hidden;
     /* Shows whenever Site Settings has no hero image uploaded; the .hero-bg
        <img> (rendered on top when one is set) covers this completely. */
-    background: url("/static/images/story.png") center/cover no-repeat;
+    background: url("/static/images/story.jpg") center/cover no-repeat;
 }
 
 .hero-section::before {
@@ -1855,6 +1825,10 @@ textarea {
         justify-content: flex-start;
         overflow-x: auto;
         padding-bottom: 8px;
+        /* Fades the right edge so a partially-hidden tab hints there's more to
+           scroll to, instead of looking like the last category is cut off. */
+        mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent 100%);
     }
 
     .menu-btn {

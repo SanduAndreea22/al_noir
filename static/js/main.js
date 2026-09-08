@@ -100,45 +100,6 @@ function createSuccessCheck() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const revealElements = document.querySelectorAll(".reveal");
-
-    function handleReveal() {
-        const triggerBottom = window.innerHeight - 100;
-
-        revealElements.forEach((element) => {
-            const elementTop = element.getBoundingClientRect().top;
-
-            if (elementTop < triggerBottom) {
-                element.classList.add("active");
-            }
-        });
-    }
-
-    window.addEventListener("scroll", handleReveal);
-    handleReveal();
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    /* =========================
-       REVEAL ON SCROLL
-    ========================= */
-    const revealElements = document.querySelectorAll(".reveal");
-
-    function handleReveal() {
-        const triggerBottom = window.innerHeight - 100;
-
-        revealElements.forEach((element) => {
-            const elementTop = element.getBoundingClientRect().top;
-
-            if (elementTop < triggerBottom) {
-                element.classList.add("active");
-            }
-        });
-    }
-
-    window.addEventListener("scroll", handleReveal);
-    handleReveal();
-
     /* =========================
        CONTACT FORM AJAX
     ========================= */

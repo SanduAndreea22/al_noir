@@ -96,7 +96,10 @@ venv\Scripts\activate        # or: source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env         # fill in your own values
 python manage.py migrate
+python manage.py collectstatic --upload-unhashed-files
 python manage.py runserver
 ```
 
 Required environment variables are listed in `.env.example`. At minimum, local development needs `DJANGO_SECRET_KEY` and `DJANGO_DEBUG=True`; Stripe and Cloudinary keys are only needed to exercise those specific features.
+
+The `collectstatic --upload-unhashed-files` step is required even for local development, not just deploys — `STORAGES['staticfiles']` always points at WhiteNoise's manifest storage regardless of `DEBUG` (see below), so `runserver` and `manage.py test` will raise `Missing staticfiles manifest entry` on any `{% static %}` reference until it's run at least once. Re-run it whenever a static file is added or changed.
