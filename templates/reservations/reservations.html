@@ -76,9 +76,9 @@
                 </div>
             </div>
 
-            <div class="menu-selection">
-                <h2>Add Menu Items</h2>
-                <p>Optional — selecting menu items now pays a 10% deposit toward your meal in advance. You can also skip this and just reserve the table.</p>
+            <details class="menu-selection"{% if selected_ids %} open{% endif %}>
+                <summary>Add Menu Items (optional)</summary>
+                <p>Selecting menu items now pays a 10% deposit toward your meal in advance. You can also skip this and just reserve the table.</p>
 
                 {% for category in categories %}
                     <div class="menu-category-block">
@@ -103,7 +103,7 @@
                 {% if form.selected_items.errors %}
                     <div class="text-danger small">{{ form.selected_items.errors }}</div>
                 {% endif %}
-            </div>
+            </details>
 
             <div class="mb-3" id="advance-summary" aria-live="polite">
                 Items Total: <strong id="menu-total">$0.00</strong><br>

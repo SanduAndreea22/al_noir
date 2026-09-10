@@ -11,6 +11,8 @@
             </a>
         </div>
 
+        <a href="/reservations/" class="btn btn-gold navbar-cta-mobile">Reservations</a>
+
         <button type="button" id="menuToggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navbarCollapse">
             <span></span>
             <span></span>
@@ -32,9 +34,9 @@
 
             <div class="navbar-right">
                 {% if user.is_authenticated %}
-                    <a href="/operations/client/" class="btn btn-gold">My Account</a>
+                    <a href="/operations/client/" class="btn btn-outline">My Account</a>
                 {% else %}
-                    <a href="/login/" class="btn btn-gold">Login</a>
+                    <a href="/login/" class="btn btn-outline">Login</a>
                 {% endif %}
                 <a href="/reservations/" class="btn btn-gold">Reservations</a>
             </div>

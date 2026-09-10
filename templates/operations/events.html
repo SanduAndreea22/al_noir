@@ -25,7 +25,7 @@
                         <h3>{{ event.title }}</h3>
                         <p>{{ event.description }}</p>
                         <span class="event-price">{% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</span>
-                        <a class="btn btn-gold" href="{% url 'operations:event_booking' event.pk %}">Book</a>
+                        <a class="btn btn-gold" href="{% url 'operations:event_booking' event.pk %}" aria-label="Book {{ event.title }}">Book</a>
                     </div>
                 {% endfor %}
             </div>

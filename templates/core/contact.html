@@ -32,6 +32,11 @@
                         title="Map showing {{ site_settings.restaurant_name }}">
                     </iframe>
                 </div>
+                <p class="map-fallback-link">
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ site_settings.address|urlencode }}" target="_blank" rel="noopener">
+                        Open in Google Maps
+                    </a>
+                </p>
             {% endif %}
         </div>
 

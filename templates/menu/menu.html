@@ -11,14 +11,16 @@
     <div class="menu-hero-content">
         <h1>MENU</h1>
 
-        <div class="menu-categories">
-            {% for category in categories %}
-                <a href="#cat-{{ category.id }}"
-                   class="menu-btn {% if forloop.first %}active{% endif %}"
-                   data-category="cat-{{ category.id }}">
-                    {{ category.name }}
-                </a>
-            {% endfor %}
+        <div class="menu-categories-wrap">
+            <div class="menu-categories">
+                {% for category in categories %}
+                    <a href="#cat-{{ category.id }}"
+                       class="menu-btn {% if forloop.first %}active{% endif %}"
+                       data-category="cat-{{ category.id }}">
+                        {{ category.name }}
+                    </a>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </section>
