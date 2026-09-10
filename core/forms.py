@@ -1,5 +1,5 @@
 from django import forms
-from .models import ContactMessage
+from .models import ContactMessage, Review
 
 
 class ContactMessageForm(forms.ModelForm):
@@ -30,8 +30,6 @@ class ContactMessageForm(forms.ModelForm):
             }),
         }
 
-from django import forms
-from .models import Review
 
 class ReviewForm(forms.ModelForm):
     class Meta:

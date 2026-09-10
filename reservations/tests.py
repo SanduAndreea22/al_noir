@@ -144,7 +144,10 @@ class GroupSizeValidationTests(TestCase):
         # 1 query to build the menu-item pricing widget (form __init__), plus exactly
         # 2 for table selection (candidate tables, then booked table ids) — fixed
         # regardless of how many tables exist, unlike the old per-table .exists() loop.
-        with self.assertNumQueries(3):
+        # The remaining 3 are SQLite's application-level validation of the
+        # `reservation_guests_gte_1` CheckConstraint (savepoint + check + release);
+        # Postgres enforces that constraint natively without extra round-trips.
+        with self.assertNumQueries(6):
             form = ReservationForm(data=data)
             self.assertTrue(form.is_valid(), form.errors)
 
@@ -188,3 +191,25 @@ class ReservationConfirmationTests(TestCase):
             response,
             reverse('reservations:confirmation', args=[reservation.pk, reservation.access_token])
         )
+
+
+class GuestsUpperBoundTests(TestCase):
+    def test_form_rejects_more_than_10_guests(self):
+        Table.objects.create(number=30, capacity=10)
+        slot = timezone.localtime(timezone.now() + timedelta(days=1)).replace(hour=19, minute=0)
+        form = ReservationForm(data={
+            'name': 'Big Party', 'email': 'party@example.com', 'phone': '0700000012',
+            'reservation_date': slot.date(), 'reservation_time': '19:00', 'guests': 11,
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('table large enough', str(form.errors))
+
+    def test_zero_guests_is_rejected_at_db_level(self):
+        table = Table.objects.create(number=31, capacity=4)
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Reservation.objects.create(
+                    table=table, name='Bad Guest Count', email='bad@example.com', phone='0700000013',
+                    reservation_date=timezone.localdate() + timedelta(days=1), reservation_time='19:00',
+                    guests=0,
+                )

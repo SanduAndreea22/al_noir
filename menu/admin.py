@@ -11,6 +11,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class MenuItemAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock_item', 'is_available', 'is_loyalty_reward')
     list_filter = ('category', 'is_available', 'is_loyalty_reward')
+    list_select_related = ('category', 'stock_item')
     autocomplete_fields = ('stock_item',)
 
 

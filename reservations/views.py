@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from menu.models import Category
 from .forms import ReservationForm
+from .models import Reservation
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,6 @@ def reservations(request):
 
 def checkout(request, pk, token):
     """Create a Stripe Checkout session for a reservation advance."""
-    from .models import Reservation
     reservation = get_object_or_404(Reservation, pk=pk, access_token=token)
     if reservation.advance_paid or reservation.advance_amount <= 0:
         return redirect("reservations:reservations")
@@ -106,7 +106,6 @@ def checkout(request, pk, token):
 
 
 def payment_success(request, pk):
-    from .models import Reservation
     reservation = get_object_or_404(Reservation, pk=pk)
     session_id = request.GET.get('session_id')
     guest_redirect = redirect('reservations:confirmation', pk=reservation.pk, token=reservation.access_token)
@@ -130,7 +129,6 @@ def payment_success(request, pk):
 def confirmation(request, pk, token):
     """Persistent, bookmarkable confirmation page for guests without an account —
     survives a refresh, unlike a one-off messages banner."""
-    from .models import Reservation
     reservation = get_object_or_404(
         Reservation.objects.select_related('table').prefetch_related('selected_items'),
         pk=pk, access_token=token,
@@ -142,7 +140,6 @@ def confirmation(request, pk, token):
 @require_POST
 def cancel_reservation(request, pk):
     """Lets a logged-in guest cancel their own upcoming reservation from the client dashboard."""
-    from .models import Reservation
     reservation = get_object_or_404(Reservation, pk=pk, user=request.user)
     if reservation.status in ('pending', 'confirmed'):
         reservation.status = 'cancelled'
@@ -154,7 +151,6 @@ def cancel_reservation(request, pk):
 @csrf_exempt
 def stripe_webhook(request):
     """Authoritative Stripe payment confirmation, including cases without a browser redirect."""
-    from .models import Reservation
     if request.method != 'POST' or not settings.STRIPE_WEBHOOK_SECRET:
         return HttpResponseBadRequest('Webhook unavailable.')
     try:

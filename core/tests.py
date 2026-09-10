@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
@@ -6,10 +7,30 @@ from .models import ContactMessage, Review
 
 
 class LoginRedirectTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
     def test_login_redirects_to_client_dashboard_not_a_404(self):
         User.objects.create_user('guest', password='test-password')
         response = self.client.post(reverse('login'), {'username': 'guest', 'password': 'test-password'})
         self.assertRedirects(response, reverse('operations:client_dashboard'))
+
+
+class LoginRateLimitTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_login_is_rate_limited_after_repeated_attempts(self):
+        for _ in range(10):
+            self.client.post(reverse('login'), {'username': 'nobody', 'password': 'wrong'})
+        response = self.client.post(
+            reverse('login'), {'username': 'nobody', 'password': 'wrong'}, follow=True
+        )
+        page_messages = [str(m) for m in response.context['messages']]
+        self.assertTrue(any('Too many attempts' in m for m in page_messages), page_messages)
 
 
 class ContactFormTests(TestCase):

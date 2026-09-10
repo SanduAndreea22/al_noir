@@ -1,4 +1,7 @@
+from django.core.cache import cache
 from django.db import models
+
+SITE_SETTINGS_CACHE_KEY = 'core:site_settings'
 
 
 class SiteSettings(models.Model):
@@ -19,6 +22,14 @@ class SiteSettings(models.Model):
     hero_image = models.ImageField(upload_to='site/', blank=True, null=True)
 
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete(SITE_SETTINGS_CACHE_KEY)
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        cache.delete(SITE_SETTINGS_CACHE_KEY)
 
     def __str__(self):
         return self.restaurant_name

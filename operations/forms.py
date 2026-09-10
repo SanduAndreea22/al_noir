@@ -16,6 +16,8 @@ class TicketForm(forms.ModelForm):
         quantity = self.cleaned_data['quantity']
         if quantity < 1:
             raise forms.ValidationError('Please book at least 1 ticket.')
+        if quantity > 20:
+            raise forms.ValidationError('For 20+ tickets, please contact us directly.')
         return quantity
 
 
@@ -34,4 +36,6 @@ class WaitlistForm(forms.ModelForm):
         guests = self.cleaned_data['guests']
         if guests < 1:
             raise forms.ValidationError('Please add at least 1 guest.')
+        if guests > 20:
+            raise forms.ValidationError('For groups larger than 20, please contact us directly.')
         return guests

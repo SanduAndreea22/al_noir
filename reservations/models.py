@@ -100,6 +100,7 @@ class Reservation(models.Model):
 
     created_at = models.DateTimeField(
         auto_now_add=True,
+        db_index=True,
     )
 
     updated_at = models.DateTimeField(
@@ -118,6 +119,10 @@ class Reservation(models.Model):
                 fields=["table", "reservation_date", "reservation_time"],
                 condition=models.Q(status__in=["pending", "confirmed"]),
                 name="unique_active_table_slot",
+            ),
+            models.CheckConstraint(
+                check=models.Q(guests__gte=1),
+                name="reservation_guests_gte_1",
             ),
         ]
 

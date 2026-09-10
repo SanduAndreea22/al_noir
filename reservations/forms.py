@@ -26,7 +26,10 @@ TIME_CHOICES = [
 
 class PricingCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     """Adds a machine-readable price to each menu checkbox for the live total."""
-    prices = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prices = {}
 
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
@@ -127,6 +130,12 @@ class ReservationForm(forms.ModelForm):
 
         if guests < 1:
             raise forms.ValidationError("The number of guests must be at least 1.")
+
+        if guests > 10:
+            raise forms.ValidationError(
+                "We don't have a table large enough for a group this size booked online. "
+                "Please call us to arrange a reservation for larger groups."
+            )
 
         reservation_time_obj = datetime.strptime(
             reservation_time,

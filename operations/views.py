@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import DecimalField, ExpressionWrapper, F, Sum
 from django.http import HttpResponse
 from django.db.models.functions import TruncDate
@@ -14,10 +14,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from core.decorators import ratelimit_post
 from core.utils import transliterate_ro
-from menu.models import Favorite
+from menu.models import Favorite, MenuItem
 from reservations.models import Reservation
 from .forms import TicketForm, WaitlistForm
 from .models import Event, Expense, Invoice, LoyaltyAccount, LoyaltyRedemption, LoyaltyTransaction, Sale, StaffProfile, StaffShift, StockItem, Ticket
+
+REDEMPTION_CODE_MAX_ATTEMPTS = 5
 
 
 def _line_total(price_field, quantity_field='quantity'):
@@ -106,7 +108,6 @@ def redeem_reward(request):
     if request.method != 'POST':
         return redirect('operations:client_dashboard')
     account, _ = LoyaltyAccount.objects.get_or_create(user=request.user)
-    from menu.models import MenuItem
     dessert = MenuItem.objects.filter(is_loyalty_reward=True, is_available=True).first()
     if account.points < 100:
         messages.error(request, 'You need at least 100 points to claim this reward.')
@@ -122,8 +123,18 @@ def redeem_reward(request):
         account.points -= 100
         account.save(update_fields=('points', 'updated_at'))
         LoyaltyTransaction.objects.create(account=account, points=-100, note='Reward: free dessert')
-        code = f'DESERT-{secrets.token_hex(4).upper()}'
-        LoyaltyRedemption.objects.create(account=account, code=code, reward=dessert)
+        # token_hex(4) codes can collide (unique=True); retry a few times with a
+        # savepoint instead of letting a rare collision surface as a 500 after
+        # points were already deducted.
+        for attempt in range(REDEMPTION_CODE_MAX_ATTEMPTS):
+            code = f'DESERT-{secrets.token_hex(4).upper()}'
+            try:
+                with transaction.atomic():
+                    LoyaltyRedemption.objects.create(account=account, code=code, reward=dessert)
+                break
+            except IntegrityError:
+                if attempt == REDEMPTION_CODE_MAX_ATTEMPTS - 1:
+                    raise
     messages.success(request, f'Your reward is ready: {code}. Show this code to staff to redeem your {dessert.name}.')
     return redirect('operations:client_dashboard')
 

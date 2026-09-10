@@ -10,6 +10,10 @@ class StockItemAdmin(admin.ModelAdmin):
     list_display = ('name', 'quantity', 'unit', 'minimum_quantity', 'expiry_date', 'is_perishable', 'is_complimentary')
     list_filter = ('is_perishable', 'is_complimentary')
     search_fields = ('name', 'supplier')
+    # quantity only moves through StockMovement (which enforces "never below
+    # zero" and keeps the audit trail) — editing it here would silently
+    # desync the balance from that trail.
+    readonly_fields = ('quantity',)
 
 
 @admin.register(StockMovement)
@@ -18,12 +22,14 @@ class StockMovementAdmin(admin.ModelAdmin):
     list_filter = ('movement_type', 'created_at')
     readonly_fields = ('created_at',)
     def has_change_permission(self, request, obj=None): return False
+    def has_delete_permission(self, request, obj=None): return False
 
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
     list_display = ('menu_item', 'customer', 'quantity', 'unit_price', 'payment_method', 'created_at')
     list_filter = ('payment_method', 'created_at')
+    list_select_related = ('menu_item', 'customer')
 
 
 @admin.register(Expense)
@@ -42,6 +48,7 @@ class EventAdmin(admin.ModelAdmin):
 class TicketAdmin(admin.ModelAdmin):
     list_display = ('event', 'customer_name', 'quantity', 'paid', 'created_at')
     list_filter = ('paid', 'event')
+    list_select_related = ('event',)
 
 
 @admin.register(Invoice)
@@ -55,6 +62,10 @@ class InvoiceAdmin(admin.ModelAdmin):
 class LoyaltyAccountAdmin(admin.ModelAdmin):
     list_display = ('user', 'points', 'available_rewards', 'updated_at')
     search_fields = ('user__username', 'user__email')
+    # points only moves through LoyaltyAccount.add_points()/redeem_reward
+    # (which keep LoyaltyTransaction as the audit trail) — editing it here
+    # would silently desync the balance from that trail.
+    readonly_fields = ('points',)
 
 
 @admin.register(LoyaltyTransaction)
@@ -62,6 +73,7 @@ class LoyaltyTransactionAdmin(admin.ModelAdmin):
     list_display = ('account', 'points', 'note', 'created_at')
     readonly_fields = ('account', 'points', 'note', 'created_at')
     def has_change_permission(self, request, obj=None): return False
+    def has_delete_permission(self, request, obj=None): return False
 
 
 @admin.register(LoyaltyRedemption)
@@ -69,6 +81,7 @@ class LoyaltyRedemptionAdmin(admin.ModelAdmin):
     list_display = ('code', 'account', 'reward', 'used_at', 'created_at')
     list_filter = ('used_at',)
     search_fields = ('code', 'account__user__username')
+    list_select_related = ('account__user', 'reward')
 
 
 @admin.register(PromoCode)
@@ -89,6 +102,7 @@ class StaffProfileAdmin(admin.ModelAdmin):
 class StaffShiftAdmin(admin.ModelAdmin):
     list_display = ('staff', 'starts_at', 'ends_at', 'clocked_in_at', 'clocked_out_at')
     list_filter = ('staff__role',)
+    list_select_related = ('staff__user',)
 
 
 @admin.action(description='Send availability notification')

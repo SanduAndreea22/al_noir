@@ -69,6 +69,11 @@ class ReservationAdmin(admin.ModelAdmin):
         "selected_items",
     )
 
+    list_select_related = (
+        "table",
+        "promo_free_item",
+    )
+
     actions = (
         confirm_reservations,
         cancel_reservations,

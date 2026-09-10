@@ -5,8 +5,9 @@ from .forms import ReviewForm
 from .utils import form_json_response, is_ajax
 from .decorators import ratelimit_post
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, views as auth_views
 from django.contrib.auth.forms import UserCreationForm
+from django.utils.decorators import method_decorator
 
 
 def home(request):
@@ -63,6 +64,7 @@ def terms(request):
     return render(request, 'core/terms.html')
 
 
+@ratelimit_post('register')
 def register(request):
     if request.user.is_authenticated:
         return redirect('operations:client_dashboard')
@@ -73,3 +75,10 @@ def register(request):
         messages.success(request, 'Your account has been created.')
         return redirect('operations:client_dashboard')
     return render(request, 'registration/register.html', {'form': form})
+
+
+@method_decorator(ratelimit_post('login'), name='post')
+class RateLimitedLoginView(auth_views.LoginView):
+    """Django's LoginView with the same per-IP POST throttling used on the
+    other public forms — otherwise brute-force login attempts are unlimited."""
+    pass

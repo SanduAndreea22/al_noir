@@ -20,6 +20,9 @@ class StockItem(models.Model):
 
     class Meta:
         ordering = ('name',)
+        constraints = [
+            models.CheckConstraint(check=models.Q(quantity__gte=0), name='stockitem_quantity_gte_0'),
+        ]
 
     @property
     def is_low_stock(self):
@@ -69,7 +72,7 @@ class Sale(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS, default=CARD)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     @property
     def total(self):
@@ -82,7 +85,9 @@ class Sale(models.Model):
         if creating and not self.unit_price:
             self.unit_price = self.menu_item.price
         if creating and not self.stock_item_id and self.menu_item.stock_item_id:
-            self.stock_item = self.menu_item.stock_item
+            # Assign the id directly (already available on menu_item without a
+            # query) instead of hydrating the full StockItem via menu_item.stock_item.
+            self.stock_item_id = self.menu_item.stock_item_id
         with transaction.atomic():
             super().save(*args, **kwargs)
             if creating and self.stock_item_id:
@@ -99,7 +104,7 @@ class Expense(models.Model):
     description = models.CharField(max_length=255)
     category = models.CharField(max_length=20, choices=CATEGORIES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    expense_date = models.DateField(default=timezone.localdate)
+    expense_date = models.DateField(default=timezone.localdate, db_index=True)
     paid = models.BooleanField(default=True)
     supplier = models.CharField(max_length=150, blank=True)
 
@@ -137,7 +142,23 @@ class Ticket(models.Model):
     customer_email = models.EmailField()
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     paid = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def save(self, *args, **kwargs):
+        # Enforced here (not just in the booking view) so any entry point —
+        # including creating tickets directly from admin — can't oversell an
+        # event's capacity.
+        if self.pk is None:
+            with transaction.atomic():
+                event = Event.objects.select_for_update().get(pk=self.event_id)
+                if event.capacity:
+                    booked = Ticket.objects.filter(event=event).aggregate(total=models.Sum('quantity'))['total'] or 0
+                    remaining = event.capacity - booked
+                    if self.quantity > remaining:
+                        raise ValueError(f'Not enough capacity for "{event.title}" ({max(remaining, 0)} spots remain).')
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.event} – {self.customer_name}'
