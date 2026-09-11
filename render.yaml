@@ -1,3 +1,9 @@
+# Reference only — not the live source of truth for deploy config.
+# The actual "al-noir" service on Render was created manually from the
+# dashboard (Blueprint deploy required a card on file at the time), so
+# build/start commands and env vars are set there, not read from this file.
+# Kept here as documentation of the intended setup; update it if the
+# dashboard config changes, so the two don't drift.
 services:
   - type: web
     name: al-noir
