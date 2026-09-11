@@ -316,7 +316,8 @@ class Command(BaseCommand):
             self.stdout.write('Events already present, skipping.')
             return
 
-        past_start = self.now - timedelta(days=18, hours=-19)
+        past_day = self.today - timedelta(days=18)
+        past_start = timezone.make_aware(datetime.combine(past_day, time(19, 0)))
         past_event = Event.objects.create(
             title='Summer Jazz Night', description='An evening of live jazz with a special tasting menu.',
             starts_at=past_start, ends_at=past_start + timedelta(hours=3),
