@@ -1,82 +1,106 @@
-{% extends 'base.html' %}
-{% block content %}
-<section class="container py-5 dashboard-page">
-    <h1 class="mb-4">Reports</h1>
+{% extends 'app_base.html' %}
+{% load ui %}
+{% block title %}Reports | {{ site_settings.restaurant_name }}{% endblock %}
+{% block topbar_title %}Operations / Reports{% endblock %}
 
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1>Reports</h1>
+        <p>{{ start|date:'M j, Y' }} – {{ end|date:'M j, Y' }}</p>
+    </div>
     <form method="get" class="filter-form">
-        <div class="form-group">
-            <label class="form-label" for="report-start">From</label>
-            <input type="date" id="report-start" name="start" value="{{ start }}">
+        <div class="field">
+            <label class="field-label" for="report-start">From</label>
+            <input type="date" id="report-start" name="start" value="{{ start|date:'Y-m-d' }}">
         </div>
-        <div class="form-group">
-            <label class="form-label" for="report-end">To</label>
-            <input type="date" id="report-end" name="end" value="{{ end }}">
+        <div class="field">
+            <label class="field-label" for="report-end">To</label>
+            <input type="date" id="report-end" name="end" value="{{ end|date:'Y-m-d' }}">
         </div>
-        <button class="btn btn-gold">Update</button>
+        <button class="btn btn-primary">Update</button>
     </form>
+</div>
+{% endblock %}
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Menu Sales</h3>
-            <p>${{ sales_revenue }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Tickets</h3>
-            <p>${{ ticket_revenue }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Reservation Deposits</h3>
-            <p>${{ advance_revenue }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Total Revenue</h3>
-            <p>${{ revenue }}</p>
-        </div>
-    </div>
+{% block content %}
+<div class="kpi-grid">
+    <div class="kpi kpi-primary{% if profit < 0 %} kpi-negative{% endif %}"><span class="kpi-label">Profit</span><span class="kpi-value">{{ profit|money }}</span><span class="kpi-meta">Revenue minus expenses</span></div>
+    <div class="kpi"><span class="kpi-label">Total revenue</span><span class="kpi-value">{{ revenue|money }}</span><span class="kpi-meta">Sales, tickets and deposits</span></div>
+    <div class="kpi"><span class="kpi-label">Total expenses</span><span class="kpi-value">{{ expenses|money }}</span><span class="kpi-meta">Paid expenses in period</span></div>
+</div>
 
-    <div class="stats-grid">
-        {% for label, total in expense_by_category %}
-        <div class="stat-card">
-            <h3>{{ label }}</h3>
-            <p>${{ total }}</p>
+<div class="dash-grid">
+    <section class="card" aria-labelledby="r-rev">
+        <div class="card-head"><h2 class="card-title" id="r-rev">Revenue by source</h2></div>
+        <div class="card-body">
+            {% if revenue > 0 %}
+            <div class="stack-bar" role="img" aria-label="Revenue split by source">
+                <span class="stack-seg seg-1" style="width: {{ sales_revenue|percent:revenue }}%"></span>
+                <span class="stack-seg seg-2" style="width: {{ advance_revenue|percent:revenue }}%"></span>
+                <span class="stack-seg seg-3" style="width: {{ ticket_revenue|percent:revenue }}%"></span>
+            </div>
+            {% endif %}
+            <div class="legend">
+                <div class="legend-row"><span class="legend-dot seg-1"></span><span class="legend-label">Menu sales</span><span class="legend-value">{{ sales_revenue|money }}</span><span class="legend-pct">{{ sales_revenue|percent:revenue }}%</span></div>
+                <div class="legend-row"><span class="legend-dot seg-2"></span><span class="legend-label">Reservation deposits</span><span class="legend-value">{{ advance_revenue|money }}</span><span class="legend-pct">{{ advance_revenue|percent:revenue }}%</span></div>
+                <div class="legend-row"><span class="legend-dot seg-3"></span><span class="legend-label">Tickets</span><span class="legend-value">{{ ticket_revenue|money }}</span><span class="legend-pct">{{ ticket_revenue|percent:revenue }}%</span></div>
+            </div>
         </div>
-        {% endfor %}
-        <div class="stat-card">
-            <h3>Total Expenses</h3>
-            <p>${{ expenses }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Profit</h3>
-            <p>${{ profit }}</p>
-        </div>
-    </div>
+    </section>
 
-    <div class="dashboard-section">
-        <h2>Popular Items</h2>
-        <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Revenue</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in top_items %}
-                <tr>
-                    <td>{{ item.menu_item__name }}</td>
-                    <td>{{ item.total_quantity }}</td>
-                    <td>${{ item.revenue }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3">No sales in the selected period.</td>
-                </tr>
+    <section class="card" aria-labelledby="r-exp">
+        <div class="card-head"><h2 class="card-title" id="r-exp">Expenses by category</h2></div>
+        <div class="card-body">
+            <div class="bar-list">
+                {% for label, total in expense_by_category %}
+                <div class="bar-row">
+                    <div class="bar-row-head"><span>{{ label }}</span><span>{{ total|money }}</span></div>
+                    <div class="bar-track"><div class="bar-fill is-cost" style="width: {{ total|percent:expenses }}%"></div></div>
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+
+    <section class="card span-2" aria-labelledby="r-daily">
+        <div class="card-head"><h2 class="card-title" id="r-daily">Menu sales by day</h2></div>
+        <div class="card-body">
+            {% with days=daily_sales|with_pct:'total' %}
+            {% if days %}
+            <div class="chart-caption"><span>Daily menu sales in the selected period</span></div>
+            <div class="column-chart{% if days|length > 14 %} is-dense{% endif %}" role="img" aria-label="Column chart of menu sales per day; the same data is listed in the table below">
+                {% for day in days %}
+                <div class="col"><span class="col-tip">{{ day.day|date:'M j' }} · {{ day.total|money }}</span><div class="col-bar" style="height: {{ day.pct }}%"></div></div>
+                {% endfor %}
+            </div>
+            <div class="column-axis" aria-hidden="true">{% for day in days %}<span>{{ day.day|date:'j' }}</span>{% endfor %}</div>
+            <table class="sr-only"><caption>Menu sales by day</caption><thead><tr><th>Day</th><th>Total</th></tr></thead><tbody>{% for day in days %}<tr><td>{{ day.day|date:'M j, Y' }}</td><td>{{ day.total|money }}</td></tr>{% endfor %}</tbody></table>
+            {% else %}
+            {% include 'partials/state.html' with icon='chart' title='No sales in this period' text='Try a wider date range.' %}
+            {% endif %}
+            {% endwith %}
+        </div>
+    </section>
+
+    <section class="card span-2" aria-labelledby="r-top">
+        <div class="card-head"><h2 class="card-title" id="r-top">Popular items</h2></div>
+        <div class="table-wrap">
+            <table class="data-table is-stackable">
+                <thead><tr><th>Item</th><th class="is-num">Quantity</th><th class="is-num">Revenue</th></tr></thead>
+                <tbody>
+                    {% for item in top_items %}
+                    <tr>
+                        <td data-label="Item">{{ item.menu_item__name }}</td>
+                        <td class="is-num" data-label="Quantity">{{ item.total_quantity }}</td>
+                        <td class="is-num" data-label="Revenue">{{ item.revenue|money }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row"><td colspan="3">{% include 'partials/state.html' with icon='utensils' title='No sales in this period' text='Popular items appear once menu sales are recorded.' %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
 {% endblock %}

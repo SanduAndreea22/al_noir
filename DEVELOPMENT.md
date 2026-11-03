@@ -12,6 +12,10 @@ Technical reference for working on this codebase. See [README.md](README.md) for
 - **Hosting:** Render (gunicorn, auto-deploy on push to `main`)
 - **PDF generation:** for reservation invoices
 
+## Frontend
+
+No frontend framework: Django templates, one hand-written stylesheet (`static/css/style.css`, token-driven) and vanilla JS. The visual language and component list are documented in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). Public pages extend `base.html`; signed-in pages (client dashboard, staff dashboard, reports, schedule) extend `app_base.html`, which swaps the marketing navbar and footer for a sidebar and topbar. Form fields render through `partials/field.html`. `docs/mock/index.html` is the static design mock that was approved before implementation.
+
 ## Architecture
 
 The project is split into four Django apps by domain:

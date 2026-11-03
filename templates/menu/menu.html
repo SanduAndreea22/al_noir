@@ -9,10 +9,10 @@
     <div class="menu-hero-overlay"></div>
 
     <div class="menu-hero-content">
-        <h1>MENU</h1>
+        <h1>Menu</h1>
 
         <div class="menu-categories-wrap">
-            <div class="menu-categories">
+            <div class="menu-categories" aria-label="Menu categories">
                 {% for category in categories %}
                     <a href="#cat-{{ category.id }}"
                        class="menu-btn {% if forloop.first %}active{% endif %}"

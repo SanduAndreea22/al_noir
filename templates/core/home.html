@@ -16,15 +16,15 @@
     <div class="hero-overlay"></div>
 
     <div class="container hero-content">
-        <p class="section-eyebrow">WELCOME TO {{ site_settings.restaurant_name|upper }}</p>
+        <p class="section-eyebrow">Welcome to {{ site_settings.restaurant_name }}</p>
         <h1>Authentic Arab Cuisine in a Refined Atmosphere</h1>
         <p class="hero-text">
             {{ site_settings.short_description }}
         </p>
 
         <div class="hero-buttons">
-            <a href="/menu/" class="btn btn-gold">View Menu</a>
-            <a href="/reservations/" class="btn btn-outline">Book a Table</a>
+            <a href="/reservations/" class="btn btn-primary btn-lg">Book a table</a>
+            <a href="/menu/" class="btn btn-secondary btn-lg">View menu</a>
         </div>
     </div>
 </section>
@@ -43,23 +43,23 @@
 
         <div class="feature-grid">
             <div class="feature-card reveal">
-                <div class="feature-icon">🍽</div>
+                <span class="feature-icon">{% include 'partials/icon.html' with name='utensils' %}</span>
                 <h3>Our Menu</h3>
                 <p>
                     Explore a curated menu inspired by authentic Arab cuisine, crafted with rich flavors,
                     premium ingredients, and elegant presentation.
                 </p>
-                <a href="/menu/" class="btn btn-gold">View Menu</a>
+                <a href="/menu/" class="btn btn-primary">View Menu</a>
             </div>
 
             <div class="feature-card reveal">
-                <div class="feature-icon">📍</div>
+                <span class="feature-icon">{% include 'partials/icon.html' with name='pin' %}</span>
                 <h3>Reservations</h3>
                 <p>
                     Reserve your table and enjoy an unforgettable evening shaped by atmosphere, taste,
                     and warm hospitality.
                 </p>
-                <a href="/reservations/" class="btn btn-outline">Book a Table</a>
+                <a href="/reservations/" class="btn btn-secondary">Book a Table</a>
             </div>
         </div>
     </div>
@@ -83,7 +83,7 @@
                 Every dish on our menu draws from Arab culinary tradition — reimagined for a candlelit room
                 in the heart of Bucharest.
             </p>
-            <a href="/about/" class="btn btn-gold">Read Our Story</a>
+            <a href="/about/" class="btn btn-primary">Read Our Story</a>
         </div>
     </div>
 </section>
@@ -125,7 +125,7 @@
         </div>
 
         <div class="reviews-button-wrap">
-            <a href="/reviews/" class="btn btn-outline">Read More Reviews</a>
+            <a href="/reviews/" class="btn btn-secondary">Read More Reviews</a>
         </div>
     </div>
 </section>
@@ -138,7 +138,7 @@
         <p>
             Book your table today and discover the elegance, mystery, and flavor of {{ site_settings.restaurant_name }}.
         </p>
-        <a href="/reservations/" class="btn btn-gold">Book a Table</a>
+        <a href="/reservations/" class="btn btn-primary">Book a Table</a>
     </div>
 </section>
 

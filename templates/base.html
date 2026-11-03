@@ -30,41 +30,30 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
-<script src="{% static 'js/main.js' %}" defer></script>
-<script src="{% static 'js/scroll-reveal.js' %}" defer></script>
-
+    <meta name="theme-color" content="#0a0a0b">
+    <script>document.documentElement.classList.add('js');</script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=7">
+    <script src="{% static 'js/main.js' %}?v=7" defer></script>
+    <script src="{% static 'js/scroll-reveal.js' %}?v=7" defer></script>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
+    <a class="skip-link" href="#main">Skip to content</a>
+    {% include 'partials/icons.html' %}
 
-    {% include 'partials/navbar.html' %}
+    {% block chrome %}
+        {% include 'partials/navbar.html' %}
 
-    <main>
-        {% if messages %}
-            <div class="container">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {% if message.tags == 'success' %}
-                            <span class="success-check-wrap">
-                                <svg class="success-check" viewBox="0 0 52 52" aria-hidden="true">
-                                    <circle class="success-check-circle" cx="26" cy="26" r="24" fill="none"/>
-                                    <path class="success-check-mark" fill="none" d="M14 27l7 7 16-16"/>
-                                </svg>
-                            </span>
-                        {% endif %}
-                        <span>{{ message }}</span>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <main id="main">
+            <div class="container messages-wrap">{% include 'partials/messages.html' %}</div>
 
-        {% block content %}
-        {% endblock %}
-    </main>
+            {% block content %}
+            {% endblock %}
+        </main>
 
-    {% include 'partials/footer.html' %}
+        {% include 'partials/footer.html' %}
+    {% endblock %}
 
 </body>
 </html>

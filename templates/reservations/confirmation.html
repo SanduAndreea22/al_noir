@@ -1,74 +1,36 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Reservation Confirmed{% endblock %}
+{% block title %}Reservation confirmed{% endblock %}
 
 {% block content %}
 <section class="reservation-section">
     <div class="reservation-container">
-        <h1 class="reservation-title">Reservation Confirmed</h1>
+        <h1 class="reservation-title">Reservation confirmed</h1>
         <p class="reservation-subtitle">
             Save or bookmark this page — it's your proof of reservation.
         </p>
 
         <div class="reservation-card">
             <h2>Reservation #{{ reservation.pk }}</h2>
-
-            <div class="form-row">
-                <div>
-                    <p class="small mb-1">Name</p>
-                    <p>{{ reservation.name }}</p>
-                </div>
-                <div>
-                    <p class="small mb-1">Status</p>
-                    <p>{{ reservation.get_status_display }}</p>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div>
-                    <p class="small mb-1">Date</p>
-                    <p>{{ reservation.reservation_date|date:"M j, Y" }}</p>
-                </div>
-                <div>
-                    <p class="small mb-1">Time</p>
-                    <p>{{ reservation.reservation_time|time:"g:i A" }}</p>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div>
-                    <p class="small mb-1">Guests</p>
-                    <p>{{ reservation.guests }}</p>
-                </div>
-                <div>
-                    <p class="small mb-1">Table</p>
-                    <p>{% if reservation.table %}#{{ reservation.table.number }}{% else %}To be assigned{% endif %}</p>
-                </div>
-            </div>
-
-            {% if reservation.selected_items.all %}
-                <p class="small mb-1">Pre-ordered items</p>
-                <p>{% for item in reservation.selected_items.all %}{{ item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-            {% endif %}
-
-            {% if reservation.advance_amount > 0 %}
-                <div class="form-row">
-                    <div>
-                        <p class="small mb-1">Deposit</p>
-                        <p>${{ reservation.advance_amount }}</p>
-                    </div>
-                    <div>
-                        <p class="small mb-1">Payment</p>
-                        <p>{% if reservation.advance_paid %}Paid{% else %}Pending{% endif %}</p>
-                    </div>
-                </div>
-            {% endif %}
-
-            {% if reservation.special_request %}
-                <p class="small mb-1">Special requests</p>
-                <p>{{ reservation.special_request }}</p>
-            {% endif %}
+            <dl class="detail-list">
+                <div><dt>Name</dt><dd>{{ reservation.name }}</dd></div>
+                <div><dt>Status</dt><dd><span class="badge badge-{{ reservation.status }}">{{ reservation.get_status_display }}</span></dd></div>
+                <div><dt>Date</dt><dd>{{ reservation.reservation_date|date:"M j, Y" }}</dd></div>
+                <div><dt>Time</dt><dd>{{ reservation.reservation_time|time:"g:i A" }}</dd></div>
+                <div><dt>Guests</dt><dd>{{ reservation.guests }}</dd></div>
+                <div><dt>Table</dt><dd>{% if reservation.table %}#{{ reservation.table.number }}{% else %}To be assigned{% endif %}</dd></div>
+                {% if reservation.selected_items.all %}
+                <div class="span-2"><dt>Pre-ordered items</dt><dd>{% for item in reservation.selected_items.all %}{{ item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>
+                {% endif %}
+                {% if reservation.advance_amount > 0 %}
+                <div><dt>Deposit</dt><dd>${{ reservation.advance_amount }}</dd></div>
+                <div><dt>Payment</dt><dd>{% if reservation.advance_paid %}<span class="badge badge-paid">Paid</span>{% else %}<span class="badge badge-pending">Pending</span>{% endif %}</dd></div>
+                {% endif %}
+                {% if reservation.special_request %}
+                <div class="span-2"><dt>Special requests</dt><dd>{{ reservation.special_request }}</dd></div>
+                {% endif %}
+            </dl>
         </div>
 
         <p class="small mt-4">

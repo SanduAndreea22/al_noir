@@ -100,45 +100,6 @@ function createSuccessCheck() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const revealElements = document.querySelectorAll(".reveal");
-
-    function handleReveal() {
-        const triggerBottom = window.innerHeight - 100;
-
-        revealElements.forEach((element) => {
-            const elementTop = element.getBoundingClientRect().top;
-
-            if (elementTop < triggerBottom) {
-                element.classList.add("active");
-            }
-        });
-    }
-
-    window.addEventListener("scroll", handleReveal);
-    handleReveal();
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    /* =========================
-       REVEAL ON SCROLL
-    ========================= */
-    const revealElements = document.querySelectorAll(".reveal");
-
-    function handleReveal() {
-        const triggerBottom = window.innerHeight - 100;
-
-        revealElements.forEach((element) => {
-            const elementTop = element.getBoundingClientRect().top;
-
-            if (elementTop < triggerBottom) {
-                element.classList.add("active");
-            }
-        });
-    }
-
-    window.addEventListener("scroll", handleReveal);
-    handleReveal();
-
     /* =========================
        CONTACT FORM AJAX
     ========================= */
@@ -368,3 +329,61 @@ if (reviewForm) {
     });
 }
 
+
+/* =========================
+   APP SIDEBAR DRAWER (signed-in pages, < 1024px)
+========================= */
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("sidebar");
+    const scrim = document.querySelector(".sidebar-scrim");
+    const openBtn = document.querySelector("[data-sidebar-open]");
+    if (!sidebar || !scrim || !openBtn) {
+        return;
+    }
+
+    function setOpen(isOpen) {
+        sidebar.classList.toggle("is-open", isOpen);
+        scrim.hidden = !isOpen;
+        openBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        document.body.style.overflow = isOpen ? "hidden" : "";
+        if (isOpen) {
+            const first = sidebar.querySelector("a, button");
+            if (first) { first.focus(); }
+        } else {
+            openBtn.focus();
+        }
+    }
+
+    openBtn.addEventListener("click", function () { setOpen(true); });
+    document.querySelectorAll("[data-sidebar-close]").forEach(function (el) {
+        el.addEventListener("click", function () { setOpen(false); });
+    });
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && sidebar.classList.contains("is-open")) {
+            setOpen(false);
+        }
+    });
+    window.matchMedia("(min-width: 1024px)").addEventListener("change", function (e) {
+        if (e.matches && sidebar.classList.contains("is-open")) { setOpen(false); }
+    });
+});
+
+/* =========================
+   SUBMIT LOADING STATE (plain POST forms only; AJAX forms manage their own)
+========================= */
+document.addEventListener("submit", function (event) {
+    const form = event.target;
+    if (event.defaultPrevented || !(form instanceof HTMLFormElement) || form.method.toLowerCase() !== "post") {
+        return;
+    }
+    const button = form.querySelector('button[type="submit"].btn, button:not([type]).btn');
+    if (button) {
+        button.classList.add("is-loading");
+        button.setAttribute("aria-busy", "true");
+    }
+});
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+        document.querySelectorAll(".btn.is-loading").forEach(function (b) { b.classList.remove("is-loading"); b.removeAttribute("aria-busy"); });
+    }
+});

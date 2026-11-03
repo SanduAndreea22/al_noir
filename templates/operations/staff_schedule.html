@@ -1,32 +1,32 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
+{% block title %}Staff schedule | {{ site_settings.restaurant_name }}{% endblock %}
+{% block topbar_title %}Operations / Staff schedule{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1>Staff schedule</h1>
+        <p>Upcoming and in-progress shifts.</p>
+    </div>
+    <div class="page-actions"><a class="btn btn-primary btn-sm" href="{% url 'admin:operations_staffshift_changelist' %}">Manage shifts</a></div>
+</div>
+{% endblock %}
 
 {% block content %}
-<section class="container py-5">
-    <h1 class="mb-4">Staff Schedule</h1>
-    <p>Shifts are created and managed from the <a href="/admin/operations/staffshift/">Admin panel</a>.</p>
-
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Employee</th>
-                    <th>Role</th>
-                    <th>Starts</th>
-                    <th>Ends</th>
-                </tr>
-            </thead>
+<section class="card">
+    <div class="table-wrap">
+        <table class="data-table is-stackable">
+            <thead><tr><th>Employee</th><th>Role</th><th>Starts</th><th>Ends</th></tr></thead>
             <tbody>
                 {% for shift in shifts %}
                 <tr>
-                    <td>{{ shift.staff.user.get_full_name|default:shift.staff.user.username }}</td>
-                    <td>{{ shift.staff.get_role_display }}</td>
-                    <td>{{ shift.starts_at|date:'M j, Y, g:i A' }}</td>
-                    <td>{{ shift.ends_at|date:'M j, Y, g:i A' }}</td>
+                    <td data-label="Employee">{{ shift.staff.user.get_full_name|default:shift.staff.user.username }}</td>
+                    <td data-label="Role"><span class="badge badge-info">{{ shift.staff.get_role_display }}</span></td>
+                    <td data-label="Starts">{{ shift.starts_at|date:'M j, Y, g:i A' }}</td>
+                    <td data-label="Ends">{{ shift.ends_at|date:'M j, Y, g:i A' }}</td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="4">No shifts scheduled.</td>
-                </tr>
+                <tr class="empty-row"><td colspan="4">{% include 'partials/state.html' with icon='calendar' title='No shifts scheduled' text='Shifts are created and managed in the admin panel.' %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>

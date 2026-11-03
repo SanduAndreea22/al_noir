@@ -1,0 +1,66 @@
+{% with current=request.resolver_match.view_name %}
+<aside class="sidebar" id="sidebar" aria-label="Application navigation">
+    <div class="sidebar-head">
+        <a href="{% url 'home' %}" class="sidebar-brand" aria-label="{{ site_settings.restaurant_name|default:'Al Noir' }} home">
+            <span class="brand-mark" aria-hidden="true">{{ site_settings.restaurant_name|default:'Al Noir'|slice:':1' }}</span>
+            <span class="brand-name">{{ site_settings.restaurant_name|default:'Al Noir' }}</span>
+        </a>
+        <button type="button" class="icon-btn sidebar-close" aria-label="Close navigation" data-sidebar-close>
+            {% include 'partials/icon.html' with name='close' %}
+        </button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <p class="nav-heading">My account</p>
+        <a class="nav-item" href="{% url 'operations:client_dashboard' %}"{% if current == 'operations:client_dashboard' %} aria-current="page"{% endif %}>
+            {% include 'partials/icon.html' with name='home' %}<span>Overview</span>
+        </a>
+        <a class="nav-item" href="{% url 'reservations:reservations' %}">
+            {% include 'partials/icon.html' with name='book' %}<span>Book a table</span>
+        </a>
+        <a class="nav-item" href="{% url 'menu' %}">
+            {% include 'partials/icon.html' with name='utensils' %}<span>Menu</span>
+        </a>
+
+        {% if user.is_staff %}
+        <p class="nav-heading">Operations</p>
+        {% if user.is_superuser or user.staff_profile.role == 'ceo' or user.staff_profile.role == 'manager' %}
+        <a class="nav-item" href="{% url 'operations:staff_dashboard' %}"{% if current == 'operations:staff_dashboard' %} aria-current="page"{% endif %}>
+            {% include 'partials/icon.html' with name='grid' %}<span>Business overview</span>
+        </a>
+        <a class="nav-item" href="{% url 'operations:reports' %}"{% if current == 'operations:reports' %} aria-current="page"{% endif %}>
+            {% include 'partials/icon.html' with name='chart' %}<span>Reports</span>
+        </a>
+        {% endif %}
+        <a class="nav-item" href="{% url 'operations:staff_schedule' %}"{% if current == 'operations:staff_schedule' %} aria-current="page"{% endif %}>
+            {% include 'partials/icon.html' with name='calendar' %}<span>Staff schedule</span>
+        </a>
+        <a class="nav-item" href="{% url 'admin:index' %}">
+            {% include 'partials/icon.html' with name='settings' %}<span>Admin panel</span>
+        </a>
+        {% endif %}
+
+        <p class="nav-heading">Explore</p>
+        <a class="nav-item" href="{% url 'operations:events' %}">
+            {% include 'partials/icon.html' with name='ticket' %}<span>Events</span>
+        </a>
+        <a class="nav-item" href="{% url 'operations:waitlist' %}">
+            {% include 'partials/icon.html' with name='clock' %}<span>Waitlist</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-foot">
+        <div class="user-chip">
+            <span class="avatar" aria-hidden="true">{{ user.get_username|slice:':1'|upper }}</span>
+            <span class="user-meta">
+                <span class="user-name">{{ user.get_full_name|default:user.get_username }}</span>
+                <span class="user-sub">{% if user.staff_profile %}{{ user.staff_profile.get_role_display }}{% elif user.is_superuser %}Administrator{% else %}Guest account{% endif %}</span>
+            </span>
+        </div>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="icon-btn" aria-label="Log out" title="Log out">{% include 'partials/icon.html' with name='logout' %}</button>
+        </form>
+    </div>
+</aside>
+{% endwith %}

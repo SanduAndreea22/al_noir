@@ -1,17 +1,15 @@
-<nav class="navbar">
+<header class="navbar">
     <div class="container navbar-container">
 
-        <div class="navbar-left">
-            <a href="/" class="logo">
-                {% if site_settings.logo %}
-                    <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.restaurant_name }}">
-                {% else %}
-                    <span>{{ site_settings.restaurant_name }}</span>
-                {% endif %}
-            </a>
-        </div>
+        <a href="{% url 'home' %}" class="logo" aria-label="{{ site_settings.restaurant_name|default:'Al Noir' }} home">
+            {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.restaurant_name }}">
+            {% else %}
+                <span>{{ site_settings.restaurant_name|default:'Al Noir' }}</span>
+            {% endif %}
+        </a>
 
-        <a href="/reservations/" class="btn btn-gold navbar-cta-mobile">Reservations</a>
+        <a href="{% url 'reservations:reservations' %}" class="btn btn-primary btn-sm navbar-cta-mobile">Book a table</a>
 
         <button type="button" id="menuToggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navbarCollapse">
             <span></span>
@@ -19,27 +17,25 @@
             <span></span>
         </button>
 
-        <div class="navbar-collapse" id="navbarCollapse">
-            <div class="navbar-center">
-                <ul class="nav-links">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/about/">Our Story</a></li>
-                    <li><a href="/menu/">Menu</a></li>
-                    <li><a href="/reviews/">Reviews</a></li>
-                    <li><a href="/contact/">Contact</a></li>
-                    <li><a href="/operations/events/">Events</a></li>
-                    <li><a href="/operations/waitlist/">Waitlist</a></li>
-                </ul>
-            </div>
+        <nav class="navbar-collapse" id="navbarCollapse" aria-label="Main">
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}"{% if request.path == '/' %} aria-current="page"{% endif %}>Home</a></li>
+                <li><a href="{% url 'about' %}"{% if request.path == '/about/' %} aria-current="page"{% endif %}>Our Story</a></li>
+                <li><a href="{% url 'menu' %}"{% if request.path == '/menu/' %} aria-current="page"{% endif %}>Menu</a></li>
+                <li><a href="{% url 'reviews' %}"{% if request.path == '/reviews/' %} aria-current="page"{% endif %}>Reviews</a></li>
+                <li><a href="{% url 'operations:events' %}"{% if request.path == '/operations/events/' %} aria-current="page"{% endif %}>Events</a></li>
+                <li><a href="{% url 'operations:waitlist' %}"{% if request.path == '/operations/waitlist/' %} aria-current="page"{% endif %}>Waitlist</a></li>
+                <li><a href="{% url 'contact' %}"{% if request.path == '/contact/' %} aria-current="page"{% endif %}>Contact</a></li>
+            </ul>
 
             <div class="navbar-right">
                 {% if user.is_authenticated %}
-                    <a href="/operations/client/" class="btn btn-outline">My Account</a>
+                    <a href="{% url 'operations:client_dashboard' %}" class="btn btn-secondary btn-sm">My account</a>
                 {% else %}
-                    <a href="/login/" class="btn btn-outline">Login</a>
+                    <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">Log in</a>
                 {% endif %}
-                <a href="/reservations/" class="btn btn-gold">Reservations</a>
+                <a href="{% url 'reservations:reservations' %}" class="btn btn-primary btn-sm">Book a table</a>
             </div>
-        </div>
+        </nav>
     </div>
-</nav>
+</header>

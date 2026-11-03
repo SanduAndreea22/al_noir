@@ -3,8 +3,8 @@
 {% block content %}
 
 <section class="page-hero">
-    <div class="container page-hero-content reveal">
-        <p class="section-eyebrow">WHAT'S ON</p>
+    <div class="container page-hero-content">
+        <p class="section-eyebrow">What's on</p>
         <h1>Events at {{ site_settings.restaurant_name }}</h1>
         <p>Wine pairings, live sets, and the occasional excuse to stay past dessert.</p>
     </div>
@@ -12,25 +12,25 @@
 
 <section class="events-section">
     <div class="container">
-        <div class="feature-intro reveal">
-            <p class="section-eyebrow">UPCOMING</p>
-            <h2>Upcoming Events</h2>
+        <div class="feature-intro">
+            <p class="section-eyebrow">Upcoming</p>
+            <h2>Upcoming events</h2>
         </div>
 
         {% if upcoming_events %}
             <div class="events-grid">
                 {% for event in upcoming_events %}
-                    <div class="event-card reveal">
+                    <article class="event-card reveal">
                         <span class="event-date">{{ event.starts_at|date:'M j, Y, g:i A' }}</span>
                         <h3>{{ event.title }}</h3>
                         <p>{{ event.description }}</p>
                         <span class="event-price">{% if event.is_free %}Free entry{% else %}${{ event.ticket_price }} / ticket{% endif %}</span>
-                        <a class="btn btn-gold" href="{% url 'operations:event_booking' event.pk %}" aria-label="Book {{ event.title }}">Book</a>
-                    </div>
+                        <a class="btn btn-primary btn-sm" href="{% url 'operations:event_booking' event.pk %}" aria-label="Book {{ event.title }}">Book</a>
+                    </article>
                 {% endfor %}
             </div>
         {% else %}
-            <p class="events-empty">No upcoming events scheduled at the moment.</p>
+            {% include 'partials/state.html' with icon='ticket' title='No upcoming events' text='Nothing is scheduled right now. Check back soon.' %}
         {% endif %}
     </div>
 </section>
@@ -38,18 +38,18 @@
 {% if past_events %}
 <section class="events-section alt-bg">
     <div class="container">
-        <div class="feature-intro reveal">
-            <p class="section-eyebrow">ARCHIVE</p>
-            <h2>Past Events</h2>
+        <div class="feature-intro">
+            <p class="section-eyebrow">Archive</p>
+            <h2>Past events</h2>
         </div>
 
         <div class="events-grid">
             {% for event in past_events %}
-                <div class="event-card event-card-past reveal">
+                <article class="event-card event-card-past reveal">
                     <span class="event-date">{{ event.starts_at|date:'M j, Y, g:i A' }}</span>
                     <h3>{{ event.title }}</h3>
                     <p>{{ event.description }}</p>
-                </div>
+                </article>
             {% endfor %}
         </div>
     </div>

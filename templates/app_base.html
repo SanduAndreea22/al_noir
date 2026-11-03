@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% comment %}
+App shell for signed-in pages: sidebar + topbar, no marketing navbar or footer.
+Child templates fill: page_title (browser + topbar), page_header (h1 area), content.
+{% endcomment %}
+
+{% block body_class %}app-body{% endblock %}
+
+{% block chrome %}
+<div class="app-shell">
+    {% include 'partials/app_sidebar.html' %}
+    <div class="sidebar-scrim" data-sidebar-close hidden></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button type="button" class="icon-btn sidebar-toggle" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false" data-sidebar-open>
+                {% include 'partials/icon.html' with name='menu' %}
+            </button>
+            <p class="topbar-title">{% block topbar_title %}{% endblock %}</p>
+            <div class="topbar-actions">
+                {% block topbar_actions %}{% endblock %}
+                <a class="btn btn-ghost btn-sm" href="{% url 'home' %}">{% include 'partials/icon.html' with name='external' %}<span>View site</span></a>
+            </div>
+        </header>
+
+        <main id="main" class="app-content">
+            {% include 'partials/messages.html' %}
+            {% block page_header %}{% endblock %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}

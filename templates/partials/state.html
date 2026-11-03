@@ -1,0 +1,7 @@
+{# Empty / error state. Usage: include with icon, title, text, and optionally href + label. #}
+<div class="empty-state">
+    <span class="empty-state-icon">{% include 'partials/icon.html' with name=icon %}</span>
+    <p class="empty-state-title">{{ title }}</p>
+    {% if text %}<p class="empty-state-text">{{ text }}</p>{% endif %}
+    {% if href %}<a class="btn btn-secondary btn-sm" href="{{ href }}">{{ label }}</a>{% endif %}
+</div>

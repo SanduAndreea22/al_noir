@@ -154,6 +154,7 @@ def staff_dashboard(request):
         'ticket_total': ticket_total,
         'expenses_total': expenses_total,
         'expense_by_category': expense_by_category,
+        'revenue_total': sales_total + advance_total + ticket_total,
         'profit': sales_total + advance_total + ticket_total - expenses_total,
         'low_stock': StockItem.objects.filter(quantity__lt=F('minimum_quantity')),
         'expired_stock': StockItem.objects.filter(expiry_date__lt=timezone.localdate()),

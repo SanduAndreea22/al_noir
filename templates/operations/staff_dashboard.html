@@ -1,74 +1,144 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
+{% load ui %}
+{% block title %}Business overview | {{ site_settings.restaurant_name }}{% endblock %}
+{% block topbar_title %}Operations / Business overview{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1>Business overview</h1>
+        <p>All-time figures. Use Reports to filter by period.</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-secondary btn-sm" href="{% url 'operations:reports' %}">Reports</a>
+        <a class="btn btn-secondary btn-sm" href="{% url 'operations:staff_schedule' %}">Schedule</a>
+        <a class="btn btn-primary btn-sm" href="{% url 'admin:index' %}">Full Admin</a>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<section class="container py-5 dashboard-page">
-    <h1 class="mb-4">Staff Dashboard</h1>
-    <p class="small">Pending reservations: {{ pending_reservations }}</p>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Menu Sales</h3>
-            <p>${{ sales_total }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Reservation Deposits</h3>
-            <p>${{ advance_total }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Tickets</h3>
-            <p>${{ ticket_total }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Total Expenses</h3>
-            <p>${{ expenses_total }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Profit</h3>
-            <p>${{ profit }}</p>
-        </div>
+<div class="kpi-grid">
+    <div class="kpi kpi-primary{% if profit < 0 %} kpi-negative{% endif %}">
+        <span class="kpi-label">Profit</span>
+        <span class="kpi-value">{{ profit|money }}</span>
+        <span class="kpi-meta">Revenue minus paid expenses</span>
     </div>
-
-    <div class="stats-grid">
-        {% for label, total in expense_by_category %}
-        <div class="stat-card">
-            <h3>{{ label }}</h3>
-            <p>${{ total }}</p>
-        </div>
-        {% endfor %}
+    <div class="kpi">
+        <span class="kpi-label">Revenue</span>
+        <span class="kpi-value">{{ revenue_total|money }}</span>
+        <span class="kpi-meta">Sales, deposits and tickets</span>
     </div>
+    <div class="kpi">
+        <span class="kpi-label">Total expenses</span>
+        <span class="kpi-value">{{ expenses_total|money }}</span>
+        <span class="kpi-meta">Paid expenses only</span>
+    </div>
+    <a class="kpi" href="{% url 'admin:reservations_reservation_changelist' %}?status__exact=pending">
+        <span class="kpi-label">{% include 'partials/icon.html' with name='book' %}Pending reservations</span>
+        <span class="kpi-value">{{ pending_reservations }}</span>
+        <span class="kpi-meta link-arrow">Review in admin {% include 'partials/icon.html' with name='arrow' %}</span>
+    </a>
+</div>
 
-    <div class="dashboard-section">
-        <h2>Stock Alerts</h2>
-        <p>
+<div class="dash-grid">
+    <section class="card" aria-labelledby="rev-title">
+        <div class="card-head"><h2 class="card-title" id="rev-title">Revenue by source</h2></div>
+        <div class="card-body">
+            {% if revenue_total > 0 %}
+            <div class="stack-bar" role="img" aria-label="Revenue split: menu sales {{ sales_total|percent:revenue_total }}%, deposits {{ advance_total|percent:revenue_total }}%, tickets {{ ticket_total|percent:revenue_total }}%">
+                <span class="stack-seg seg-1" style="width: {{ sales_total|percent:revenue_total }}%"></span>
+                <span class="stack-seg seg-2" style="width: {{ advance_total|percent:revenue_total }}%"></span>
+                <span class="stack-seg seg-3" style="width: {{ ticket_total|percent:revenue_total }}%"></span>
+            </div>
+            {% endif %}
+            <div class="legend">
+                <div class="legend-row"><span class="legend-dot seg-1"></span><span class="legend-label">Menu sales</span><span class="legend-value">{{ sales_total|money }}</span><span class="legend-pct">{{ sales_total|percent:revenue_total }}%</span></div>
+                <div class="legend-row"><span class="legend-dot seg-2"></span><span class="legend-label">Reservation deposits</span><span class="legend-value">{{ advance_total|money }}</span><span class="legend-pct">{{ advance_total|percent:revenue_total }}%</span></div>
+                <div class="legend-row"><span class="legend-dot seg-3"></span><span class="legend-label">Tickets</span><span class="legend-value">{{ ticket_total|money }}</span><span class="legend-pct">{{ ticket_total|percent:revenue_total }}%</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card" aria-labelledby="exp-title">
+        <div class="card-head"><h2 class="card-title" id="exp-title">Expenses by category</h2></div>
+        <div class="card-body">
+            <div class="bar-list">
+                {% for label, total in expense_by_category %}
+                <div class="bar-row">
+                    <div class="bar-row-head"><span>{{ label }}</span><span>{{ total|money }}</span></div>
+                    <div class="bar-track"><div class="bar-fill is-cost" style="width: {{ total|percent:expenses_total }}%"></div></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="card" aria-labelledby="stock-title">
+        <div class="card-head">
+            <h2 class="card-title" id="stock-title">Stock alerts {% if low_stock %}<span class="badge badge-danger">{{ low_stock|length }}</span>{% endif %}</h2>
+            <a class="link-arrow" href="{% url 'admin:operations_stockitem_changelist' %}">Manage {% include 'partials/icon.html' with name='arrow' %}</a>
+        </div>
+        <div class="activity-list">
             {% for item in low_stock %}
-                <span class="stock-low">{{ item.name }} ({{ item.quantity }} {{ item.unit }})</span>{% if not forloop.last %}, {% endif %}
+            <div class="activity-row">
+                <span class="activity-icon is-danger">{% include 'partials/icon.html' with name='box' %}</span>
+                <div class="activity-main">
+                    <p class="activity-title">{{ item.name }}</p>
+                    <p class="activity-sub">{{ item.quantity }} {{ item.unit }} left · minimum {{ item.minimum_quantity }}</p>
+                </div>
+                <div class="activity-side"><div class="progress meter" role="presentation"><div class="progress-bar is-danger" style="width: {{ item.quantity|percent:item.minimum_quantity }}%"></div></div></div>
+            </div>
             {% empty %}
-                No products below threshold.
+            {% include 'partials/state.html' with icon='check' title='All stocked up' text='No products are below their minimum threshold.' %}
             {% endfor %}
-        </p>
-    </div>
+        </div>
+    </section>
 
-    <div class="dashboard-section">
-        <h2>Expired Products</h2>
-        <p>
+    <section class="card" aria-labelledby="exp-stock-title">
+        <div class="card-head">
+            <h2 class="card-title" id="exp-stock-title">Expired products {% if expired_stock %}<span class="badge badge-warning">{{ expired_stock|length }}</span>{% endif %}</h2>
+        </div>
+        <div class="activity-list">
             {% for item in expired_stock %}
-                <span class="stock-low">{{ item.name }}</span>{% if not forloop.last %}, {% endif %}
+            <div class="activity-row">
+                <span class="activity-icon is-warning">{% include 'partials/icon.html' with name='alert' %}</span>
+                <div class="activity-main">
+                    <p class="activity-title">{{ item.name }}</p>
+                    <p class="activity-sub">Expired {{ item.expiry_date|date:'M j, Y' }}</p>
+                </div>
+            </div>
             {% empty %}
-                No expired products.
+            {% include 'partials/state.html' with icon='check' title='Nothing expired' text='No products are past their expiry date.' %}
             {% endfor %}
-        </p>
-    </div>
+        </div>
+    </section>
 
-    <div class="dashboard-section">
-        <h2>Recent Invoices</h2>
-        <ul>
-            {% for invoice in invoices %}
-                <li>{{ invoice.number }} – ${{ invoice.amount }} <a href="{% url 'operations:invoice_pdf' invoice.pk %}">PDF</a></li>
-            {% empty %}
-                <li>No invoices yet.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <a class="btn btn-gold mt-4" href="/admin/">Full Admin</a>
-</section>
+    <section class="card span-2" aria-labelledby="inv-title">
+        <div class="card-head">
+            <h2 class="card-title" id="inv-title">Recent invoices</h2>
+            <a class="link-arrow" href="{% url 'admin:operations_invoice_changelist' %}">All invoices {% include 'partials/icon.html' with name='arrow' %}</a>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table is-stackable">
+                <thead><tr><th>Number</th><th>Customer</th><th>Description</th><th>Issued</th><th class="is-num">Amount</th><th>Status</th><th><span class="sr-only">PDF</span></th></tr></thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td data-label="Number">{{ invoice.number }}</td>
+                        <td data-label="Customer">{{ invoice.customer_name }}</td>
+                        <td data-label="Description">{{ invoice.description }}</td>
+                        <td data-label="Issued">{{ invoice.issued_at|date:'M j, Y' }}</td>
+                        <td class="is-num" data-label="Amount">{{ invoice.amount|money }}</td>
+                        <td data-label="Status">{% if invoice.paid %}<span class="badge badge-paid">Paid</span>{% else %}<span class="badge badge-unpaid">Unpaid</span>{% endif %}</td>
+                        <td><a class="link-arrow" href="{% url 'operations:invoice_pdf' invoice.pk %}">{% include 'partials/icon.html' with name='file' %}PDF</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row"><td colspan="7">{% include 'partials/state.html' with icon='file' title='No invoices yet' text='Invoices created in the admin panel will show up here.' %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
 {% endblock %}
