@@ -826,7 +826,7 @@ h1,h2,.fd-logo span,.fd-dishes h3,.fd-cat{font-family:'Cormorant Garamond',Georg
 .fd-pagehead>*{position:relative}.fd-pagehead h1{font-size:clamp(56px,6vw,92px);font-weight:500;line-height:1;margin-bottom:44px}
 .fd-tabs{display:flex;gap:36px}.fd-tabs a{padding:0 0 18px;font:600 12px Inter,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--text-2);border-bottom:2px solid transparent;cursor:pointer}
 .fd-tabs a.on{color:var(--accent-hover);border-color:var(--accent)}
-.fd-menu-full{display:grid;grid-template-columns:300px 1fr;gap:96px;max-width:1240px;margin:0 auto}
+.fd-menu-full{display:block;max-width:900px;margin:0 auto}.fd-menu-full .fd-item,.fd-menu-full .fd-note{max-width:none}
 .fd-h2{font-size:52px;font-weight:500;line-height:1}.fd-item{padding:6px 0 4px;max-width:720px}
 .fd-heart{border:0;background:none;color:var(--text-3);font-size:15px;margin-left:6px;cursor:pointer}.fd-heart.is{color:#e07a6e}
 .fd-rate{margin:-12px 0 24px;font-size:13px;color:var(--text-3)}.fd-rate a{color:var(--accent);cursor:pointer}
@@ -990,7 +990,6 @@ h1,h2,.fd-logo span,.fd-dishes h3,.fd-cat{font-family:'Cormorant Garamond',Georg
  <div class="fd-pagehead" style="--img:url(img/hero.jpg)"><p class="fd-eyebrow">À la carte</p><h1>The Menu</h1>
   <div class="fd-tabs"><a class="on">Starters</a><a>Main Courses</a><a>Grills</a><a>Desserts</a></div></div>
  <section class="fd-sec fd-menu-full">
-  <figure class="fd-arch fd-arch-sm" style="--img:url(img/arch.jpg);--pos:50% 50%"></figure>
   <div>
    <h2 class="fd-h2">Starters</h2><span class="fd-orn" style="margin-left:0"></span>
    <div class="fd-item"><div class="fd-row"><span>Hummus <button class="fd-heart" aria-label="Save">♥</button></span><i></i><b>$7.00</b></div><p class="fd-d">Chickpea, tahini, olive oil</p><p class="fd-rate">★ 4.8 <small>(12)</small> · <a>Rate</a></p></div>
