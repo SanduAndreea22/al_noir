@@ -2,144 +2,130 @@
 {% load static %}
 
 {% block title %}Home | {{ site_settings.restaurant_name }}{% endblock %}
+{% block body_class %}has-hero{% endblock %}
 
 {% block content %}
+{% static 'images/hero-default.jpg' as default_hero %}
+{% static 'images/dish-default.jpg' as default_dish %}
+{% static 'images/story.png' as story_img %}
 
-<!-- HERO SECTION -->
-<section class="hero-section">
-    {% if site_settings.hero_image %}
-        <div class="hero-bg">
-            <img src="{{ site_settings.hero_image.url }}" alt="{{ site_settings.restaurant_name }}">
-        </div>
-    {% endif %}
-
-    <div class="hero-overlay"></div>
-
-    <div class="container hero-content">
+<!-- HERO -->
+<section class="hero-section{% if not site_settings.hero_image %} hero--default{% endif %}" style="--hero-img: url('{% if site_settings.hero_image %}{{ site_settings.hero_image.url }}{% else %}{{ default_hero }}{% endif %}')">
+    <div class="hero-content">
         <p class="section-eyebrow">Welcome to {{ site_settings.restaurant_name }}</p>
-        <h1>Authentic Arab Cuisine in a Refined Atmosphere</h1>
-        <p class="hero-text">
-            {{ site_settings.short_description }}
-        </p>
+        <h1>Authentic Arab cuisine in a <em>refined</em> atmosphere</h1>
+        <p class="hero-text">{{ site_settings.short_description }}</p>
 
         <div class="hero-buttons">
-            <a href="/reservations/" class="btn btn-primary btn-lg">Book a table</a>
-            <a href="/menu/" class="btn btn-secondary btn-lg">View menu</a>
+            <a href="{% url 'reservations:reservations' %}" class="btn btn-primary btn-lg">Book a table</a>
+            <a href="{% url 'menu' %}" class="btn btn-secondary btn-lg">Explore the menu</a>
+        </div>
+        <p class="hero-note">Online reservations · dinner service 6:00 – 10:00 PM</p>
+    </div>
+</section>
+
+<!-- WHAT YOU CAN DO -->
+<section class="ribbon" aria-label="How it works">
+    <div class="ribbon-item">{% include 'partials/icon.html' with name='calendar' %}<h3>Reserve online</h3><p>Choose your date and time in a few steps.</p></div>
+    <div class="ribbon-item">{% include 'partials/icon.html' with name='utensils' %}<h3>Pre-order your menu</h3><p>Select dishes before you arrive.</p></div>
+    <div class="ribbon-item">{% include 'partials/icon.html' with name='ticket' %}<h3>10% deposit</h3><p>Secures a pre-order, paid securely online.</p></div>
+    <div class="ribbon-item">{% include 'partials/icon.html' with name='gift' %}<h3>Your account</h3><p>Bookings, favourites, and a free dessert at 100 points.</p></div>
+</section>
+
+<!-- FROM THE KITCHEN -->
+<section class="section">
+    <div class="split">
+        <figure class="arch reveal" style="--arch-img: url('{% if site_settings.hero_image %}{{ site_settings.hero_image.url }}{% else %}{{ default_dish }}{% endif %}'); --arch-pos: 40% 55%" role="img" aria-label="A plated dish at {{ site_settings.restaurant_name }}"></figure>
+        <div class="split-text reveal">
+            <p class="section-eyebrow">From the kitchen</p>
+            <h2>Cooked over fire, plated with patience</h2>
+            <span class="ornament"></span>
+            <ul class="dish-list">
+                <li><h3>Saffron-spiced kabsa</h3><p>Arab culinary tradition, not a diluted “Middle Eastern fusion”.</p></li>
+                <li><h3>Slow-braised beef &amp; wild mushrooms</h3><p>Cooked slowly, served without hurry.</p></li>
+                <li><h3>Char-grilled seafood</h3><p>Straight from the grill to a candlelit table.</p></li>
+                <li><h3>Baklava</h3><p>Also our loyalty reward: 100 points, one free dessert.</p></li>
+            </ul>
+            <a href="{% url 'menu' %}" class="text-link">See the full menu →</a>
         </div>
     </div>
 </section>
 
-<!-- MENU + RESERVATIONS SECTION -->
-<section class="home-feature-section">
+<!-- STORY -->
+<section class="section section--tint">
+    <div class="split split--reverse">
+        <div class="split-text reveal">
+            <p class="section-eyebrow">Our story</p>
+            <h2>A room built for lingering, not rushing</h2>
+            <span class="ornament"></span>
+            <p>Every dish on our menu draws from Arab culinary tradition, reimagined for a candlelit room in the heart of Bucharest.</p>
+            <a href="{% url 'about' %}" class="text-link">Read our story →</a>
+        </div>
+        <figure class="arch arch--tall reveal" style="--arch-img: url('{{ story_img }}'); --arch-pos: 55% 50%" role="img" aria-label="Dinner by candlelight"></figure>
+    </div>
+</section>
+
+<!-- MENU TEASER -->
+{% if menu_preview %}
+<section class="section">
     <div class="container">
-        <div class="feature-intro reveal">
-            <p class="section-eyebrow">OUR EXPERIENCE</p>
-            <h2>Elegance, Flavor, and Atmosphere</h2>
-            <p>
-                Slow-braised beef and wild mushrooms, saffron-spiced kabsa, a candlelit room built for evenings
-                you don't want to rush. That's what's waiting at {{ site_settings.restaurant_name }}.
-            </p>
+        <div class="section-head section-head--center reveal">
+            <p class="section-eyebrow">The menu</p>
+            <h2>A taste of the evening</h2>
+            <span class="ornament"></span>
         </div>
-
-        <div class="feature-grid">
-            <div class="feature-card reveal">
-                <span class="feature-icon">{% include 'partials/icon.html' with name='utensils' %}</span>
-                <h3>Our Menu</h3>
-                <p>
-                    Explore a curated menu inspired by authentic Arab cuisine, crafted with rich flavors,
-                    premium ingredients, and elegant presentation.
-                </p>
-                <a href="/menu/" class="btn btn-primary">View Menu</a>
+        <div class="menu-preview reveal">
+            {% for category, items in menu_preview %}
+            <div>
+                <h3 class="menu-cat">{{ category.name }}</h3>
+                {% for item in items %}
+                <div class="menu-line"><span>{{ item.name }}</span><i></i><span class="price">${{ item.price }}</span></div>
+                {% if item.description %}<p class="menu-desc">{{ item.description }}</p>{% else %}<p class="menu-desc"></p>{% endif %}
+                {% endfor %}
             </div>
-
-            <div class="feature-card reveal">
-                <span class="feature-icon">{% include 'partials/icon.html' with name='pin' %}</span>
-                <h3>Reservations</h3>
-                <p>
-                    Reserve your table and enjoy an unforgettable evening shaped by atmosphere, taste,
-                    and warm hospitality.
-                </p>
-                <a href="/reservations/" class="btn btn-secondary">Book a Table</a>
-            </div>
+            {% endfor %}
         </div>
+        <p class="menu-preview-foot"><a href="{% url 'menu' %}" class="text-link">View the full menu →</a></p>
     </div>
 </section>
+{% endif %}
 
-<!-- OUR STORY SECTION -->
-<section class="story-section">
-    <div class="container story-container">
-        <div class="story-image reveal">
-            {% if site_settings.hero_image %}
-                <img src="{{ site_settings.hero_image.url }}" alt="Our Story">
-            {% else %}
-                <img src="{% static 'images/story.png' %}" alt="Our Story">
-            {% endif %}
-        </div>
-
-        <div class="story-content reveal">
-            <p class="section-eyebrow">OUR STORY</p>
-            <h2>The Story Behind {{ site_settings.restaurant_name }}</h2>
-            <p>
-                Every dish on our menu draws from Arab culinary tradition — reimagined for a candlelit room
-                in the heart of Bucharest.
-            </p>
-            <a href="/about/" class="btn btn-primary">Read Our Story</a>
-        </div>
-    </div>
-</section>
-
-<!-- REVIEWS PREVIEW -->
-<section class="reviews-section">
+<!-- REVIEWS -->
+<section class="reviews-section section--tint">
     <div class="container">
-        <div class="feature-intro reveal">
-            <p class="section-eyebrow">GUEST REVIEWS</p>
-            <h2>What Our Guests Say</h2>
+        <div class="section-head reveal">
+            <p class="section-eyebrow">Guest reviews</p>
+            <h2>What our guests say</h2>
         </div>
 
         <div class="reviews-grid">
             {% for review in approved_reviews %}
                 <div class="review-card reveal">
-                    <div class="review-stars">
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= review.rating %}
-                                <span>★</span>
-                            {% else %}
-                                <span class="star-muted">★</span>
-                            {% endif %}
-                        {% endfor %}
+                    <div class="review-stars" aria-label="{{ review.rating }} out of 5 stars">
+                        {% for i in "12345" %}{% if forloop.counter <= review.rating %}<span>★</span>{% else %}<span class="star-muted">★</span>{% endif %}{% endfor %}
                     </div>
                     <p class="review-text">“{{ review.review_text }}”</p>
                     <h4>{{ review.name }}</h4>
                 </div>
             {% empty %}
                 <div class="review-card reveal">
-                    <div class="review-stars">
-                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                    </div>
-                    <p class="review-text">
-                        “An elegant atmosphere, unforgettable flavors, and a dining experience that truly feels special.”
-                    </p>
-                    <h4>Guest Review</h4>
+                    <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+                    <p class="review-text">“An elegant atmosphere, unforgettable flavors, and a dining experience that truly feels special.”</p>
+                    <h4>Guest review</h4>
                 </div>
             {% endfor %}
         </div>
 
         <div class="reviews-button-wrap">
-            <a href="/reviews/" class="btn btn-secondary">Read More Reviews</a>
+            <a href="{% url 'reviews' %}" class="text-link">Read more reviews →</a>
         </div>
     </div>
 </section>
 
 <!-- FINAL CTA -->
-<section class="cta-section">
-    <div class="container cta-content reveal">
-        <p class="section-eyebrow">RESERVE YOUR EXPERIENCE</p>
-        <h2>Make Your Evening Memorable</h2>
-        <p>
-            Book your table today and discover the elegance, mystery, and flavor of {{ site_settings.restaurant_name }}.
-        </p>
-        <a href="/reservations/" class="btn btn-primary">Book a Table</a>
-    </div>
+<section class="band" style="--band-img: url('{% if site_settings.hero_image %}{{ site_settings.hero_image.url }}{% else %}{{ default_hero }}{% endif %}')">
+    <p class="section-eyebrow">Reserve your evening</p>
+    <h2>Make it a night to remember</h2>
+    <div class="hero-buttons"><a href="{% url 'reservations:reservations' %}" class="btn btn-primary btn-lg">Book a table</a></div>
 </section>
-
 {% endblock %}

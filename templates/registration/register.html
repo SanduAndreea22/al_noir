@@ -7,7 +7,7 @@
         <h1>Create your account</h1>
         <p class="auth-lead">Track your reservations and earn loyalty rewards.</p>
 
-        <form method="post" novalidate>
+        <form method="post" class="form-fine" novalidate>
             {% csrf_token %}
             {% include 'partials/form_errors.html' %}
             {% for field in form %}{% include 'partials/field.html' %}{% endfor %}

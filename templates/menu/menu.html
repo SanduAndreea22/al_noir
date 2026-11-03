@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Menu | {{ site_settings.restaurant_name }}{% endblock %}
+
 {% block content %}
 
-<!-- HERO MENU -->
+<!-- HEADER IMAGE + CATEGORY TABS -->
 <section class="menu-hero">
-
     <div class="menu-hero-overlay"></div>
 
     <div class="menu-hero-content">
-        <h1>Menu</h1>
+        <p class="section-eyebrow">À la carte</p>
+        <h1>The Menu</h1>
 
         <div class="menu-categories-wrap">
             <div class="menu-categories" aria-label="Menu categories">
@@ -30,72 +32,62 @@
     <div class="container">
 
         {% for category in categories %}
-        <div class="menu-category {% if forloop.first %}active{% endif %}"
-             id="cat-{{ category.id }}">
+        <div class="menu-category {% if forloop.first %}active{% endif %}" id="cat-{{ category.id }}">
 
             <div class="menu-category-header">
-                {% if category.image %}
-                    <div class="menu-category-image">
-                        <img src="{{ category.image.url }}" alt="{{ category.name }}">
-                    </div>
-                {% endif %}
                 <h2>{{ category.name }}</h2>
-                <div class="divider"></div>
+                <span class="ornament"></span>
             </div>
 
             <div class="menu-items">
-
                 {% for item in category.items.all %}
                     {% if item.is_available %}
-
                     <div class="menu-item">
-
-                        <div class="menu-item-left">
-                            <div class="menu-item-title-row">
-                                <h3>{{ item.name }}</h3>
-                                {% if user.is_authenticated %}
-                                    <button type="button"
-                                            class="btn-favorite {% if item.pk in favorite_ids %}is-favorited{% endif %}"
-                                            data-toggle-url="{% url 'toggle_favorite' item.pk %}"
-                                            data-label-add="Save to favorites"
-                                            data-label-remove="Remove from favorites"
-                                            aria-label="{% if item.pk in favorite_ids %}Remove from favorites{% else %}Save to favorites{% endif %}">♥</button>
-                                {% endif %}
-                            </div>
-                            <p>{{ item.description }}</p>
-
-                            <div class="menu-item-rating">
-                                {% if item.rating_count %}
-                                    <span><span class="rating-star-icon">★</span> {{ item.avg_rating|floatformat:1 }} <span class="small">({{ item.rating_count }})</span></span>
-                                {% else %}
-                                    <span class="small">No ratings yet</span>
-                                {% endif %}
-
-                                {% if user.is_authenticated %}
-                                    <div class="rate-widget" data-rate-url="{% url 'rate_item' item.pk %}">
-                                        <span class="small">Rate:</span>
-                                        {% for i in "12345" %}
-                                            <button type="button" class="rate-star" data-stars="{{ forloop.counter }}" aria-label="Rate {{ forloop.counter }} star{{ forloop.counter|pluralize }}">★</button>
-                                        {% endfor %}
-                                        <span class="rate-feedback small" aria-live="polite"></span>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="menu-item-right">
+                        <div class="menu-line">
+                            <h3>{{ item.name }}</h3>
+                            {% if user.is_authenticated %}
+                                <button type="button"
+                                        class="btn-favorite {% if item.pk in favorite_ids %}is-favorited{% endif %}"
+                                        data-toggle-url="{% url 'toggle_favorite' item.pk %}"
+                                        data-label-add="Save to favorites"
+                                        data-label-remove="Remove from favorites"
+                                        aria-label="{% if item.pk in favorite_ids %}Remove from favorites{% else %}Save to favorites{% endif %}">♥</button>
+                            {% endif %}
+                            <i></i>
                             <span class="price">${{ item.price }}</span>
                         </div>
+                        {% if item.description %}<p>{{ item.description }}</p>{% endif %}
 
+                        <div class="menu-item-rating">
+                            {% if item.rating_count %}
+                                <span><span class="rating-star-icon">★</span> {{ item.avg_rating|floatformat:1 }} <span class="small">({{ item.rating_count }})</span></span>
+                            {% else %}
+                                <span class="small">No ratings yet</span>
+                            {% endif %}
+
+                            {% if user.is_authenticated %}
+                                <div class="rate-widget" data-rate-url="{% url 'rate_item' item.pk %}">
+                                    <span class="small">Rate:</span>
+                                    {% for i in "12345" %}
+                                        <button type="button" class="rate-star" data-stars="{{ forloop.counter }}" aria-label="Rate {{ forloop.counter }} star{{ forloop.counter|pluralize }}">★</button>
+                                    {% endfor %}
+                                    <span class="rate-feedback small" aria-live="polite"></span>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-
                     {% endif %}
                 {% endfor %}
-
             </div>
 
         </div>
         {% endfor %}
+
+        <div class="menu-note">
+            <strong>Want it ready when you arrive?</strong>
+            Pick dishes while you reserve. A 10% deposit secures the pre-order.
+            <br><a class="text-link" href="{% url 'reservations:reservations' %}">Reserve and pre-order →</a>
+        </div>
 
     </div>
 </section>

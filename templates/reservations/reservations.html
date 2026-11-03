@@ -4,43 +4,42 @@
 {% block title %}Reservations{% endblock %}
 
 {% block content %}
-<section class="reservation-section">
-    <div class="reservation-container">
+{% static 'images/hero-default.jpg' as default_hero %}
+<div class="book">
+    <aside class="book-photo" style="--hero-img: url('{% if site_settings.hero_image %}{{ site_settings.hero_image.url }}{% else %}{{ default_hero }}{% endif %}')">
+        <div>
+            <p class="section-eyebrow">Reserve &amp; pre-order</p>
+            <h2>Your table is waiting</h2>
+            <p>Online reservations are available for dinner service (6:00 PM – 10:00 PM). For lunch or same-day requests, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
+        </div>
+    </aside>
+
+    <div class="book-form">
         <h1 class="reservation-title">Reserve a table</h1>
-        <p class="reservation-subtitle">
-            Online reservations are available for dinner service (6:00 PM – 10:00 PM). For lunch or same-day requests, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.
-        </p>
 
-        <form method="post" novalidate>
+        <form method="post" class="form-fine" novalidate>
             {% csrf_token %}
+            {% include 'partials/form_errors.html' %}
 
-            <div class="reservation-grid">
-                <div class="reservation-card">
-                    <h2>Your details</h2>
-                    <div class="form-row">
-                        {% include 'partials/field.html' with field=form.name %}
-                        {% include 'partials/field.html' with field=form.email %}
-                    </div>
-                    <div class="form-row">
-                        {% include 'partials/field.html' with field=form.phone %}
-                        {% include 'partials/field.html' with field=form.guests %}
-                    </div>
-                    <p class="field-hint" style="margin: -4px 0 var(--space-4)">For groups larger than 10, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
-                    <div class="form-row">
-                        {% include 'partials/field.html' with field=form.reservation_date %}
-                        {% include 'partials/field.html' with field=form.reservation_time %}
-                    </div>
-                </div>
-
-                <div class="reservation-card">
-                    <h2>Additional info</h2>
-                    {% include 'partials/field.html' with field=form.special_request %}
-                    {% include 'partials/field.html' with field=form.promo_code %}
-                </div>
+            <div class="form-row">
+                {% include 'partials/field.html' with field=form.name %}
+                {% include 'partials/field.html' with field=form.email %}
             </div>
+            <div class="form-row">
+                {% include 'partials/field.html' with field=form.phone %}
+                {% include 'partials/field.html' with field=form.guests %}
+            </div>
+            <p class="form-hint-line">For groups larger than 10, please call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}.</p>
+            <div class="form-row">
+                {% include 'partials/field.html' with field=form.reservation_date %}
+                {% include 'partials/field.html' with field=form.reservation_time %}
+            </div>
+            {% include 'partials/field.html' with field=form.special_request %}
+            {% include 'partials/field.html' with field=form.promo_code %}
 
-            <details class="menu-selection"{% if selected_ids %} open{% endif %}>
+            <details class="menu-selection" open>
                 <summary>Add menu items (optional)</summary>
+                <h2>Pre-order <small>(optional)</small></h2>
                 <p>Selecting menu items now pays a 10% deposit toward your meal in advance. You can also skip this and just reserve the table.</p>
 
                 {% for category in categories %}
@@ -64,7 +63,7 @@
                 {% endfor %}
 
                 {% if form.selected_items.errors %}
-                    <div class="text-danger small">{{ form.selected_items.errors }}</div>
+                    <p class="field-error" role="alert">{{ form.selected_items.errors }}</p>
                 {% endif %}
             </details>
 
@@ -73,15 +72,13 @@
                 <span>Reservation deposit (10%): <strong id="advance-total">$0.00</strong></span>
             </div>
 
-            {% include 'partials/form_errors.html' %}
-
             <div class="reservation-submit">
-                <button type="submit" class="btn btn-primary">Reserve now</button>
+                <button type="submit" class="btn btn-primary btn-lg">Reserve now</button>
             </div>
         </form>
 
         <p class="small mt-3">Need to cancel or change a reservation? Call us{% if site_settings.phone %} at {{ site_settings.phone }}{% endif %}{% if site_settings.email %} or email {{ site_settings.email }}{% endif %} at least 2 hours in advance.</p>
     </div>
-</section>
+</div>
 <script src="{% static 'js/reservation-deposit.js' %}" defer></script>
 {% endblock %}

@@ -1,34 +1,34 @@
-/* Al Noir admin theme — maps Django admin variables onto the design tokens in style.css (Obsidian & Brass). */
+/* Al Noir admin theme — maps Django admin variables onto the design tokens in style.css (Obsidian & Brass (warm)). */
 
 :root,
 html[data-theme="dark"],
 html[data-theme="light"] {
-    --primary: #c9a45c;
-    --secondary: #111113;
-    --accent: #c9a45c;
-    --primary-fg: #16110a;
+    --primary: #cfa95b;
+    --secondary: #120e0b;
+    --accent: #cfa95b;
+    --primary-fg: #1a1206;
 
-    --body-fg: #f4f4f5;
-    --body-bg: #0a0a0b;
-    --body-quiet-color: #a8a8b2;
-    --body-medium-color: #d4d4d8;
+    --body-fg: #f1e7d3;
+    --body-bg: #0a0806;
+    --body-quiet-color: #c4b69f;
+    --body-medium-color: #e0d5bf;
     --body-loud-color: #ffffff;
 
-    --header-color: #c9a45c;
-    --header-branding-color: #c9a45c;
-    --header-bg: #0a0a0b;
-    --header-link-color: #f4f4f5;
+    --header-color: #cfa95b;
+    --header-branding-color: #cfa95b;
+    --header-bg: #0a0806;
+    --header-link-color: #f1e7d3;
 
-    --breadcrumbs-fg: #a8a8b2;
-    --breadcrumbs-link-fg: #c9a45c;
-    --breadcrumbs-bg: #111113;
+    --breadcrumbs-fg: #c4b69f;
+    --breadcrumbs-link-fg: #cfa95b;
+    --breadcrumbs-bg: #120e0b;
 
-    --link-fg: #c9a45c;
-    --link-hover-color: #d9b872;
-    --link-selected-fg: #d9b872;
+    --link-fg: #cfa95b;
+    --link-hover-color: #e3c27f;
+    --link-selected-fg: #e3c27f;
 
-    --hairline-color: #26262b;
-    --border-color: #36363d;
+    --hairline-color: #2b2119;
+    --border-color: #3d2f22;
 
     --error-fg: #f27d7d;
 
@@ -36,35 +36,35 @@ html[data-theme="light"] {
     --message-warning-bg: #3a2f0d;
     --message-error-bg: #341818;
 
-    --darkened-bg: #111113;
-    --selected-bg: #17171a;
-    --selected-row: #1f1a10;
+    --darkened-bg: #120e0b;
+    --selected-bg: #1a1410;
+    --selected-row: #241c15;
 
-    --button-fg: #16110a;
-    --button-bg: #c9a45c;
-    --button-hover-bg: #d9b872;
-    --default-button-bg: #c9a45c;
-    --default-button-hover-bg: #c9a45c;
-    --close-button-bg: #26262b;
-    --close-button-hover-bg: #36363d;
+    --button-fg: #1a1206;
+    --button-bg: #cfa95b;
+    --button-hover-bg: #e3c27f;
+    --default-button-bg: #cfa95b;
+    --default-button-hover-bg: #cfa95b;
+    --close-button-bg: #2b2119;
+    --close-button-hover-bg: #3d2f22;
     --delete-button-bg: #b34a4a;
     --delete-button-hover-bg: #c95b5b;
 
-    --object-tools-fg: #16110a;
-    --object-tools-bg: #c9a45c;
-    --object-tools-hover-bg: #d9b872;
+    --object-tools-fg: #1a1206;
+    --object-tools-bg: #cfa95b;
+    --object-tools-hover-bg: #e3c27f;
 
     color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --primary: #c9a45c;
-        --secondary: #111113;
-        --body-fg: #f4f4f5;
-        --body-bg: #0a0a0b;
-        --link-fg: #c9a45c;
-        --link-hover-color: #d9b872;
+        --primary: #cfa95b;
+        --secondary: #120e0b;
+        --body-fg: #f1e7d3;
+        --body-bg: #0a0806;
+        --link-fg: #cfa95b;
+        --link-hover-color: #e3c27f;
         color-scheme: dark;
     }
 }

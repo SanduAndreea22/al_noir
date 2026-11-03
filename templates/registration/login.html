@@ -7,7 +7,7 @@
         <h1>Welcome back</h1>
         <p class="auth-lead">Log in to see your reservations and loyalty rewards.</p>
 
-        <form method="post" novalidate>
+        <form method="post" class="form-fine" novalidate>
             {% csrf_token %}
             {% include 'partials/form_errors.html' %}
             {% for field in form %}{% include 'partials/field.html' %}{% endfor %}

@@ -1,5 +1,7 @@
 # Al Noir — Design system
 
+> **Update: direction 2, "fine dining".** The first direction (cool "Obsidian & Brass") was replaced after review by a warmer, photography-led one. Tokens keep their names, so everything below still applies; values changed to warm black (`--bg #0a0806`), ivory text (`--text #f1e7d3`) and champagne gold (`--accent #cfa95b`). Public pages are editorial: full-bleed hero photo, arch-framed photography, typographic menu lines with dotted leaders, underline form fields, and a photo + form reservation layout. Signed-in pages keep the app shell, with the same palette and no photography. Photos come from Site Settings (hero image); `static/images/hero-default.jpg` and `dish-default.jpg` are only fallbacks and should be replaced with real photography of the restaurant's dishes.
+
 Source of truth for the interface. All tokens live at the top of `static/css/style.css`; nothing below that block should contain a raw colour, radius or shadow value.
 
 ## Audit summary (what the redesign fixes)

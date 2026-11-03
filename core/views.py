@@ -1,3 +1,5 @@
+from django.db.models import Prefetch
+from menu.models import Category, MenuItem
 from .forms import ContactMessageForm
 from django.shortcuts import redirect, render
 from .models import Review
@@ -10,10 +12,24 @@ from django.contrib.auth.forms import UserCreationForm
 from django.utils.decorators import method_decorator
 
 
+def _menu_preview(max_categories=2, max_items=3):
+    """First available dishes of the first categories, for the home page teaser."""
+    available = Prefetch('items', queryset=MenuItem.objects.filter(is_available=True))
+    preview = []
+    for category in Category.objects.prefetch_related(available):
+        items = list(category.items.all())[:max_items]
+        if items:
+            preview.append((category, items))
+        if len(preview) == max_categories:
+            break
+    return preview
+
+
 def home(request):
     approved_reviews = Review.objects.filter(is_approved=True)[:3]
     return render(request, 'core/home.html', {
-        'approved_reviews': approved_reviews
+        'approved_reviews': approved_reviews,
+        'menu_preview': _menu_preview(),
     })
 
 def about(request):

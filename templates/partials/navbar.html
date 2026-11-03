@@ -5,7 +5,8 @@
             {% if site_settings.logo %}
                 <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.restaurant_name }}">
             {% else %}
-                <span>{{ site_settings.restaurant_name|default:'Al Noir' }}</span>
+                <span class="logo-name">{{ site_settings.restaurant_name|default:'Al Noir' }}</span>
+                <small class="logo-caption">Fine dining</small>
             {% endif %}
         </a>
 
@@ -30,11 +31,11 @@
 
             <div class="navbar-right">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'operations:client_dashboard' %}" class="btn btn-secondary btn-sm">My account</a>
+                    <a href="{% url 'operations:client_dashboard' %}" class="nav-login">My account</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">Log in</a>
+                    <a href="{% url 'login' %}" class="nav-login">Log in</a>
                 {% endif %}
-                <a href="{% url 'reservations:reservations' %}" class="btn btn-primary btn-sm">Book a table</a>
+                <a href="{% url 'reservations:reservations' %}" class="btn btn-primary">Book a table</a>
             </div>
         </nav>
     </div>

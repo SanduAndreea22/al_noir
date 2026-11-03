@@ -12,7 +12,7 @@
 
 <section class="form-page">
     <div class="form-card">
-        <form method="post" novalidate>
+        <form method="post" class="form-fine" novalidate>
             {% csrf_token %}
             {% include 'partials/form_errors.html' %}
             {% for field in form %}{% include 'partials/field.html' %}{% endfor %}
