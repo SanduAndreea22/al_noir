@@ -377,16 +377,17 @@ h1, h2, h3, h4 { text-wrap: balance; }
 /* hero */
 .hero-section { position: relative; display: flex; align-items: center; min-height: min(100vh, 820px); background: var(--hero-img) center / cover no-repeat, var(--bg); }
 .hero-section.hero--default { background: var(--hero-img) right bottom / auto 100% no-repeat, var(--bg); }
+@media (min-width: 1921px) { .hero-section.hero--default { background-position: center bottom; } }
 .hero-section::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 8, 6, 0.88) 0%, rgba(10, 8, 6, 0.5) 42%, rgba(10, 8, 6, 0) 66%), linear-gradient(0deg, rgba(10, 8, 6, 0.7), transparent 24%); }
 .hero-section::after { content: ''; position: absolute; inset: 104px 36px 36px; border: 1px solid var(--accent-line); pointer-events: none; }
-.hero-content { position: relative; z-index: 1; width: min(100% - 48px, 1320px); padding: 140px 0 90px 56px; }
+.hero-content { position: relative; z-index: 1; width: min(100% - 48px, 1320px); margin-inline: auto; padding: 140px 0 90px 56px; }
 .hero-content h1 { max-width: 19ch; font-size: clamp(2.8rem, 1.2rem + 5vw, 5rem); line-height: 1.02; }
 .hero-content h1 em { color: var(--accent-hover); font-style: italic; }
 .hero-text { max-width: 520px; margin-top: var(--space-5); font-size: var(--text-lg); line-height: 1.7; color: var(--text-2); }
 .hero-buttons { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-7); }
 .hero-note { margin-top: var(--space-5); color: var(--text-3); font-size: var(--text-sm); letter-spacing: 0.04em; }
 
-.ribbon { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--accent-line); background: var(--surface-1); }
+.ribbon { display: grid; grid-template-columns: repeat(4, 1fr); padding-inline: max(0px, calc((100% - 1320px) / 2)); border-block: 1px solid var(--accent-line); background: var(--surface-1); }
 .ribbon-item { padding: var(--space-6) var(--space-7); border-left: 1px solid var(--border); }
 .ribbon-item:first-child { border-left: 0; }
 .ribbon-item .icon { width: 26px; height: 26px; margin-bottom: var(--space-3); color: var(--accent); stroke-width: 1.4; }
